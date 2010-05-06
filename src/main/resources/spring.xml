@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+	<!-- Application Properties -->
+	<context:annotation-config />
+	<context:property-placeholder location="classpath:application.properties" />
+	<context:component-scan base-package="net.ameba.cassandra.web" />
+	
+	<!-- Handler Mapping -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping">
+		
+		<property name="interceptors">
+			<list>
+				<bean id="cassandraClientInterceptor" class="net.ameba.cassandra.web.controller.CassandraClientInterceptor" />
+			</list>
+		</property>
+		
+	</bean>
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver" />
+	
+	<!-- View -->
+	<bean id="freemarkerConfig"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer"
+		autowire="no">
+		<property name="templateLoaderPath" value="/WEB-INF/view/" />
+		<property name="defaultEncoding" value="UTF-8" />
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="template_exception_handler">net.ameba.cassandra.web.util.FreemarkerExceptionHandler</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- View Resolver -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.freemarker.FreeMarkerView" />
+		<property name="contentType" value="text/html; charset=UTF-8" />
+		<property name="cache" value="true" />
+		<property name="prefix" value="" />
+		<property name="suffix" value=".ftl" />
+		<property name="redirectContextRelative" value="false" />
+		<property name="exposeSpringMacroHelpers" value="true" />
+	</bean>
+
+	<!-- Message Resources -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="classpath:messages/messages" />
+		<!--<property name="basename" value="WEB-INF/messages" />-->
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+	
+	<!-- Multipart Resolver -->
+	<!--
+		<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize"> <value>1073741824</value> </property>
+		</bean>
+	-->
+
+	<!-- Mail Sender -->
+	<!-- 
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="${mail.smtp.host}" />
+		<property name="port" value="${mail.smtp.port}" />
+		<property name="protocol" value="${mail.smtp.protocol}" />
+		<property name="username" value="${mail.smtp.from}" />
+		<property name="password" value="${mail.smtp.password}" />
+		<property name="javaMailProperties">
+			<props>
+				<prop key="mail.smtps.auth">${mail.smtp.auth}</prop>
+				<prop key="mail.smtps.starttls.enable">${mail.smtp.starttls}</prop>
+				<prop key="mail.smtps.debug">${mail.smtp.debug}</prop>
+			</props>
+		</property>
+	</bean>
+	-->
+
+	<!-- Cryptors -->
+	<!-- 
+	<bean id="ticketCryptor" class="jp.ameba.common.crypto.BasicCryptor">
+		<constructor-arg value="AES/CBC/PKCS5Padding" />
+		<constructor-arg value="${cryptor.ticket.key}" />
+		<constructor-arg value="128" />
+		<property name="strong" value="true" />
+	</bean>
+	-->
+	
+</beans>

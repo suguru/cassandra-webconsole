@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+	version="2.5">
+
+	<display-name>Ameba Administration Server</display-name>
+	
+	<servlet>
+		<servlet-name>spring</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>contextConfigLocation</param-name>
+			<param-value>classpath:spring.xml</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<!-- URL Rewrite Filter -->
+	<filter>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+		<init-param>
+			<param-name>logLevel</param-name>
+			<param-value>WARN</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>UrlRewriteFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- UTF8 Encoding Filter -->
+	<filter>
+		<filter-name>CharsetEncoding</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+		<init-param>
+			<param-name>forceEncoding</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+
+	<!-- No Cache Filter -->
+	<filter>
+		<filter-name>NoCacheFilter</filter-name>
+		<filter-class>net.ameba.cassandra.web.util.NoCacheFilter</filter-class>
+	</filter>
+
+	<filter-mapping>
+		<filter-name>CharsetEncoding</filter-name>
+		<servlet-name>spring</servlet-name>
+	</filter-mapping>
+
+	<filter-mapping>
+		<filter-name>NoCacheFilter</filter-name>
+		<url-pattern>/core/*</url-pattern>
+	</filter-mapping>
+
+	<!-- Servlet Mapping -->
+
+	<servlet-mapping>
+		<servlet-name>spring</servlet-name>
+		<url-pattern>/core/*</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.html</welcome-file>
+	</welcome-file-list>
+
+	<!-- Error Pages -->
+	<!-- 
+	<error-page>
+		<error-code>400</error-code>
+		<location>/core/error/400</location>
+	</error-page>
+	<error-page>
+		<error-code>401</error-code>
+		<location>/core/error/401</location>
+	</error-page>
+	<error-page>
+		<error-code>403</error-code>
+		<location>/core/error/403</location>
+	</error-page>
+	<error-page>
+		<error-code>404</error-code>
+		<location>/core/error/404</location>
+	</error-page>
+	<error-page>
+		<error-code>405</error-code>
+		<location>/core/error/405</location>
+	</error-page>
+	<error-page>
+		<error-code>406</error-code>
+		<location>/core/error/406</location>
+	</error-page>
+	<error-page>
+		<error-code>408</error-code>
+		<location>/core/error/408</location>
+	</error-page>
+	<error-page>
+		<error-code>409</error-code>
+		<location>/core/error/409</location>
+	</error-page>
+	<error-page>
+		<error-code>410</error-code>
+		<location>/core/error/410</location>
+	</error-page>
+	<error-page>
+		<error-code>411</error-code>
+		<location>/core/error/411</location>
+	</error-page>
+	<error-page>
+		<error-code>412</error-code>
+		<location>/core/error/412</location>
+	</error-page>
+	<error-page>
+		<error-code>413</error-code>
+		<location>/core/error/413</location>
+	</error-page>
+	<error-page>
+		<error-code>500</error-code>
+		<location>/core/error/500</location>
+	</error-page>
+	<error-page>
+		<error-code>501</error-code>
+		<location>/error/501</location>
+	</error-page>
+	<error-page>
+		<error-code>502</error-code>
+		<location>/error/502</location>
+	</error-page>
+	<error-page>
+		<error-code>503</error-code>
+		<location>/error/503</location>
+	</error-page>
+	<error-page>
+		<error-code>504</error-code>
+		<location>/error/504</location>
+	</error-page>
+	<error-page>
+		<error-code>505</error-code>
+		<location>/error/505</location>
+	</error-page>
+	-->
+</web-app>
+
