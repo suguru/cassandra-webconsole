@@ -5,7 +5,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import net.ameba.cassandra.web.util.ByteArray;
+
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.thrift.KeySlice;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
+import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.cassandra.thrift.Cassandra.Client;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -19,7 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class ColumnFamilyController extends AbstractBaseController {
-
+	
 	@RequestMapping(value="/keyspace/{name}/addcf", method=RequestMethod.GET)
 	public String addColumnFamily() {
 		return "/keyspace_addcf";
@@ -81,8 +90,56 @@ public class ColumnFamilyController extends AbstractBaseController {
 		// setting names
 		model.addAttribute("keyspaceName", keyspaceName);
 		model.addAttribute("columnFamilyName", columnFamilyName);
+		if (cassandraService.isSystemKeyspace(keyspaceName)) {
+			model.put("system", true);
+		}
 		
 		return "/columnfamily";
+	}
+	
+	@RequestMapping(value="/keyspace/{keyspaceName}/{columnFamilyName}/browse", method=RequestMethod.GET)
+	public String browseColumnFamily(
+			@PathVariable("keyspaceName") String keyspaceName,
+			@PathVariable("columnFamilyName") String columnFamilyName,
+			@RequestParam(value="start", defaultValue="") String start,
+			@RequestParam(value="count", defaultValue="50") int count,
+			ModelMap model) throws Exception {
+		
+		Client client = clientProvider.getThriftClient();
+		// set target keyspace.
+		client.set_keyspace(keyspaceName);
+		// set target column family
+		ColumnParent parent = new ColumnParent(columnFamilyName);
+		// create target range
+		SliceRange sliceRange = new SliceRange();
+		sliceRange.setStart(new byte[0]);
+		sliceRange.setFinish(new byte[0]);
+		sliceRange.setCount(10);
+		
+		SlicePredicate slicePredicate = new SlicePredicate();
+		slicePredicate.setSlice_range(sliceRange);
+		
+		KeyRange range = new KeyRange(count + 1);
+		range.setStart_key(ByteArray.toBytes(start));
+		range.setEnd_key(new byte[0]);
+		
+		try {
+			List<KeySlice> slices = client.get_range_slices(
+					parent,
+					slicePredicate,
+					range,
+					ConsistencyLevel.ONE);
+			
+			model.addAttribute("slices", slices);
+		} catch (UnavailableException ex) {
+			model.addAttribute("unavailable", true);
+		}
+		
+		// setting names
+		model.addAttribute("keyspaceName", keyspaceName);
+		model.addAttribute("columnFamilyName", columnFamilyName);
+		
+		return "/columnfamily_browse";
 	}
 	
 	@RequestMapping(value="/keyspace/{keyspaceName}/{columnFamilyName}/rename", method=RequestMethod.GET)

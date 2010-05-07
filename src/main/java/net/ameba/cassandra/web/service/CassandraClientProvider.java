@@ -100,8 +100,7 @@ public class CassandraClientProvider {
 				probe = new NodeProbe(host, port);
 				probeMap.put(host + ":" + port, probe);
 			} catch (IOException e) {
-				// TODO handle connection failure
-				throw new RuntimeException(e);
+				return null;
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

@@ -8,15 +8,23 @@
 <a href="./"><strong>${columnFamilyName?html}</strong></a>
 </nav>
 
-<div class="section">
-<h3>Control</h3>
 <nav class="control">
 <a class="formbox" title="Rename Column Family" href="rename">Rename Column Family</a>
 <a class="formbox" title="Drop Column Family" href="drop">Drop Column Family</a>
 </nav>
+
+<#if system?exists>
+<h2>Browsing not available</h2>
+<#else>
+<h2>Data</h2>
+<div id="browse">
 </div>
 
-<div class="section">
-</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#browse").load("browse");
+});
+</script>
+</#if>
 
 <#include "footer.ftl">

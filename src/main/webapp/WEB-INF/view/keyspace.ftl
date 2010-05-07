@@ -6,18 +6,13 @@
 <a href="./"><strong>${keyspaceName?html}</strong></a>
 </nav>
 
-<div class="section">
-
-<h3>Control</h3>
 <nav class="control">
 <a class="formbox" title="Add Column Family" href="addcf">Add Column Family</a>
 <a class="formbox" title="Rename Keyspace" href="rename">Rename Keyspace</a>
 <a class="formbox" title="Drop Keyspace" href="drop">Drop Keyspace</a>
 </nav>
-</div>
 
-<div class="section">
-<h3>Column Families</h3>
+<h2>Column Families</h2>
 
 <#list describeMap?keys as key>
 <#assign map = describeMap[key]>
@@ -32,11 +27,8 @@
 </table>
 </#list>
 
-</div>
-
+<h2>Token Range</h2>
 <#if tokenRanges?exists>
-<div class="section">
-<h3>Token Range</h3>
 <table>
 <tr>
 <th>Endpoints</th>
@@ -55,7 +47,6 @@ ${endpoint?html}<#if endpoint_has_next>,</#if>
 </tr>
 </#list>
 </table>
-</div>
 </#if>
 
 <#include "footer.ftl">

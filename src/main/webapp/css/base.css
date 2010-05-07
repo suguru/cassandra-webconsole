@@ -61,14 +61,18 @@ table.keyspace {
 table caption {
 	text-align: left;
 	font-weight: bold;
-	padding: 0.3em;
+	padding: 0.3em 0.3em 0.3em 0.6em;
 	border: 1px solid #666;
 	border-bottom: none;
-	background: #bbc;
+	background: #cce;
 	
-	-webkit-border-radius: 0 1em 0 0;
-	-moz-border-radius: 0 1em 0 0;
-	border-radius: 0 1em 0 0;
+	-webkit-border-radius: 7px 7px 0 0;
+	-moz-border-radius: 7px 7px 0 0;
+	border-radius: 7px 7px 0 0;
+}
+
+table.section caption a {
+	color: #ffeeee;
 }
 
 table tr {
@@ -82,25 +86,30 @@ table th {
 	text-align: left;
 }
 
-table td {
+td {
 	border: 1px solid #666;
 	margin: 0;
 	padding: 0.3em;
 }
 
-table td.up {
+td.up {
 	color: #3c3;
 	font-weight: bold;
 }
-table td.down {
+td.down {
 	color: #c33;
 	font-weight: bold;
 }
-table td.status {
+td.status {
 	text-align: center;
 }
-table td.bytes {
+td.bytes, td.number, td.date {
 	text-align: right;
+}
+
+nav.control {
+	display: block;
+	padding-top: 8px;
 }
 
 nav.control a,
@@ -227,15 +236,11 @@ button.cancel:hover {
 }
 
 #content h2 {
-	font-size: 1.4em;
-	margin: 0 0 0.6em 0;
-	padding: 0.2em 0.4em;
-	border: 1px solid #666;
-	-webkit-border-radius: 7px;
-	-moz-border-radius: 7px;
-	border-radius: 7px;
-	background: -webkit-gradient(linear, left top, left bottom, from(#778), to(#667));
-	background: -moz-linear-gradient(top,  #778,  #556);
+	font-size: 1.2em;
+	padding: 0;
+	margin: 0.8em 0;
+	color: #336;
+	border-bottom: 1px solid #999;
 }
 
 #content h3 {
@@ -263,7 +268,7 @@ button.cancel:hover {
 }
 
 #content table {
-	margin: 0 0.6em 1em;
+	margin-bottom: 1em;
 }
 
 #content .section {

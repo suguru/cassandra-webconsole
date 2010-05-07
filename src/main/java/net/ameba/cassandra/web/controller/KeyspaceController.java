@@ -13,7 +13,6 @@ import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.cassandra.thrift.Cassandra.Client;
-import org.apache.thrift.transport.TTransportException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -27,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  */
 @Controller
 public class KeyspaceController extends AbstractBaseController {
-
+	
 	@Autowired
 	private CassandraClientProvider clientProvider;
 	
@@ -49,11 +48,13 @@ public class KeyspaceController extends AbstractBaseController {
 		Collections.sort(columnFamilies);
 		model.put("columnFamilies", columnFamilies);
 		
-		try {
+		// Check the system keyspace
+		boolean isSystem = cassandraService.isSystemKeyspace(keyspaceName);
+		if (isSystem) {
+			model.put("system", true);
+		} else {
 			List<TokenRange> tokenRange = client.describe_ring(keyspaceName);
 			model.put("tokenRanges", tokenRange);
-		} catch (TTransportException ex) {
-			// TODO Exception
 		}
 		
 		return "/keyspace";
