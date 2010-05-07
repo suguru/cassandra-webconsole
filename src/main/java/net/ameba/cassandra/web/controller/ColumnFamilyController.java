@@ -8,6 +8,7 @@ import java.util.Map;
 import net.ameba.cassandra.web.util.ByteArray;
 
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.KeyRange;
@@ -16,6 +17,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.cassandra.thrift.Cassandra.Client;
+import org.apache.commons.codec.binary.Hex;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +47,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 			ModelMap model) throws Exception {
 		
 		Client client = clientProvider.getThriftClient();
+		client.set_keyspace(keyspaceName);
 		
 		// trim name
 		name = name.trim();
@@ -69,7 +72,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 		
 		// redirecting to keyspace page.
 		model.clear();
-		return "redirect:./";
+		return "redirect:./" + name + "/";
 	}
 	
 	@RequestMapping(value="/keyspace/{keyspaceName}/{columnFamilyName}/", method=RequestMethod.GET)
@@ -102,6 +105,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 			@PathVariable("keyspaceName") String keyspaceName,
 			@PathVariable("columnFamilyName") String columnFamilyName,
 			@RequestParam(value="start", defaultValue="") String start,
+			@RequestParam(value="end", defaultValue="") String end,
 			@RequestParam(value="count", defaultValue="50") int count,
 			ModelMap model) throws Exception {
 		
@@ -114,23 +118,58 @@ public class ColumnFamilyController extends AbstractBaseController {
 		SliceRange sliceRange = new SliceRange();
 		sliceRange.setStart(new byte[0]);
 		sliceRange.setFinish(new byte[0]);
-		sliceRange.setCount(10);
+		sliceRange.setCount(6);
 		
 		SlicePredicate slicePredicate = new SlicePredicate();
 		slicePredicate.setSlice_range(sliceRange);
 		
+		// Set row range from request
 		KeyRange range = new KeyRange(count + 1);
-		range.setStart_key(ByteArray.toBytes(start));
-		range.setEnd_key(new byte[0]);
+		if (start.length() > 0) {
+			range.setStart_key(Hex.decodeHex(start.toCharArray()));
+		} else {
+			range.setStart_key(new byte[0]);
+		}
+		if (end.length() > 0) {
+			range.setEnd_key(Hex.decodeHex(end.toCharArray()));
+		} else {
+			range.setEnd_key(new byte[0]);
+		}
 		
 		try {
+			// getting slice
 			List<KeySlice> slices = client.get_range_slices(
 					parent,
 					slicePredicate,
 					range,
 					ConsistencyLevel.ONE);
 			
-			model.addAttribute("slices", slices);
+			KeySliceType[] types = new KeySliceType[slices.size()];
+			for (int i = 0; i < types.length; i++) {
+				KeySlice keySlice = slices.get(i);
+				KeySliceType type = new KeySliceType();
+				type.key = ByteArray.toUTF(keySlice.getKey());
+				type.keyHex = new String(Hex.encodeHex(keySlice.getKey()));
+				
+				int clen = Math.min(5, keySlice.getColumnsSize());
+				type.columns = new String[clen];
+				for (int j = 0; j < clen; j++) {
+					ColumnOrSuperColumn cos = keySlice.columns.get(j);
+					if (cos.isSetColumn()) {
+						type.columns[j] = new String(Hex.encodeHex(cos.column.name));
+					} else if (cos.isSetSuper_column()) {
+						type.columns[j] = new String(Hex.encodeHex(cos.super_column.name));
+					} else {
+						type.columns[j] = "Unknown";
+					}
+				}
+				if (keySlice.getColumnsSize() > 5) {
+					type.hasMoreColumn = true;
+				}
+				types[i] = type;
+			}
+			
+			model.addAttribute("slices", types);
 		} catch (UnavailableException ex) {
 			model.addAttribute("unavailable", true);
 		}
@@ -199,4 +238,24 @@ public class ColumnFamilyController extends AbstractBaseController {
 		return "redirect:../";
 		
 	}
+	
+	public static class KeySliceType {
+		private String key;
+		private String keyHex;
+		private String[] columns;
+		private boolean hasMoreColumn = false;
+		public String getKey() {
+			return key;
+		}
+		public String[] getColumns() {
+			return columns;
+		}
+		public String getKeyHex() {
+			return keyHex;
+		}
+		public boolean isHasMoreColumn() {
+			return hasMoreColumn;
+		}
+	}
 }
+
