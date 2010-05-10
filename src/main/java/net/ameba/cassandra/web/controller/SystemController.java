@@ -53,7 +53,7 @@ public class SystemController extends AbstractBaseController {
 	 * @throws Exception
 	 */
 	@RequestMapping(value="/ring/", method=RequestMethod.GET)
-	public void desribeRing(ModelMap model) throws Exception {
+	public void describeRing(ModelMap model) throws Exception {
 		
 		NodeProbe probe = clientProvider.getProbe();
 		if (probe == null) {
@@ -119,7 +119,9 @@ public class SystemController extends AbstractBaseController {
 		Map<String, ColumnFamilyStoreMBean> cfMap = new TreeMap<String, ColumnFamilyStoreMBean>();
 		while (iterator.hasNext()) {
 			Entry<String, ColumnFamilyStoreMBean> entry = iterator.next();
-			cfMap.put(entry.getKey(), entry.getValue());
+			String keyspace = entry.getKey();
+			String columnFamily = entry.getValue().getColumnFamilyName();
+			cfMap.put(keyspace + ":" + columnFamily, entry.getValue());
 		}
 		
 		Iterator<Entry<String, IExecutorMBean>> tpIterator = probe.getThreadPoolMBeanProxies();
