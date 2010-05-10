@@ -17,13 +17,17 @@
 		<dependency>
 			<groupId>org.apache.thrift</groupId>
 			<artifactId>libthrift</artifactId>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
 			<version>r917130</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra</artifactId>
-			<version>0.7.0</version>
+			<scope>system</scope>
+			<systemPath>${basedir}/lib/apache-cassandra-r942296.jar</systemPath>
+			<version>r942296</version>
 		</dependency>
 		
 		<dependency>
