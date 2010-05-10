@@ -1,0 +1,16 @@
+Cassandra-WebConsole is web based console for cassandra server cluster.
+
+Project description
+-------------------
+
+
+Requirements
+-------------------
+  * Java >= 1.6
+  * Tomcat >= 6.0
+    maven2 (compile)
+
+Getting started
+-------------------
+put the WAR file to your web application directory.
+Configuration menu will be shown at first access.
