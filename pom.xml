@@ -26,7 +26,7 @@
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra</artifactId>
 			<scope>system</scope>
-			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apache-cassandra-r942296.jar</systemPath>
+			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apache-cassandra-r942768.jar</systemPath>
 			<version>r942296</version>
 		</dependency>
 		
