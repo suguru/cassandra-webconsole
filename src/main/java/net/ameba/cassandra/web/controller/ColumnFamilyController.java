@@ -107,7 +107,12 @@ public class ColumnFamilyController extends AbstractBaseController {
 			@RequestParam(value="start", defaultValue="") String start,
 			@RequestParam(value="end", defaultValue="") String end,
 			@RequestParam(value="count", defaultValue="50") int count,
+			@RequestParam(value="columnCount", defaultValue="5") int columnCount,
+			@RequestParam(value="encode", defaultValue="hex") String encode,
 			ModelMap model) throws Exception {
+		
+		model.addAttribute("count", count);
+		model.addAttribute("encode", encode);
 		
 		Client client = clientProvider.getThriftClient();
 		// set target keyspace.
@@ -118,7 +123,8 @@ public class ColumnFamilyController extends AbstractBaseController {
 		SliceRange sliceRange = new SliceRange();
 		sliceRange.setStart(new byte[0]);
 		sliceRange.setFinish(new byte[0]);
-		sliceRange.setCount(6);
+		sliceRange.setCount(columnCount + 1);
+		
 		
 		SlicePredicate slicePredicate = new SlicePredicate();
 		slicePredicate.setSlice_range(sliceRange);
@@ -150,8 +156,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 				KeySliceType type = new KeySliceType();
 				type.key = ByteArray.toUTF(keySlice.getKey());
 				type.keyHex = new String(Hex.encodeHex(keySlice.getKey()));
-				
-				int clen = Math.min(5, keySlice.getColumnsSize());
+				int clen = Math.min(columnCount, keySlice.getColumnsSize());
 				type.columns = new String[clen];
 				for (int j = 0; j < clen; j++) {
 					ColumnOrSuperColumn cos = keySlice.columns.get(j);
@@ -163,13 +168,14 @@ public class ColumnFamilyController extends AbstractBaseController {
 						type.columns[j] = "Unknown";
 					}
 				}
-				if (keySlice.getColumnsSize() > 5) {
+				if (keySlice.getColumnsSize() > columnCount) {
 					type.hasMoreColumn = true;
 				}
 				types[i] = type;
 			}
 			
 			model.addAttribute("slices", types);
+			
 		} catch (UnavailableException ex) {
 			model.addAttribute("unavailable", true);
 		}
