@@ -2,6 +2,7 @@ package net.ameba.cassandra.web.controller;
 
 import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,8 @@ import net.ameba.cassandra.web.service.CassandraClientProvider;
 
 import org.apache.cassandra.concurrent.IExecutorMBean;
 import org.apache.cassandra.db.ColumnFamilyStoreMBean;
+import org.apache.cassandra.dht.Range;
+import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.tools.NodeProbe;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,25 +62,30 @@ public class SystemController extends AbstractBaseController {
 		NodeProbe probe = clientProvider.getProbe();
 		if (probe == null) {
 			// TODO JMX Connection failed
-			throw new RuntimeException("JMX Connection failed");
+			throw new RuntimeException("JMX Connection failed.");
 		}
 		Set<String> liveNodes = probe.getLiveNodes();
 		Set<String> unreachableNodes = probe.getUnreachableNodes();
 		Map<String, String> loadMap = probe.getLoadMap();
-//		Map<Range, List<String>> rangeMap = probe.getRangeToEndpointMap(null);
-//		List<Range> rangeList = new ArrayList<Range>(rangeMap.keySet());
-		
+		Map<Range, List<String>> rangeMap = probe.getRangeToEndpointMap(null);
 		List<Node> nodes = new ArrayList<Node>(liveNodes.size() + unreachableNodes.size());
-		for (String addr : liveNodes) {
+		List<Range> ranges = new ArrayList<Range>(rangeMap.keySet());
+		Collections.sort(ranges);
+		
+		for (Range range : ranges) {
+			
+			List<String> endPoints = rangeMap.get(range);
 			Node node = new Node();
-			node.up = true;
-			node.address = addr;
-			node.load = loadMap.get(addr);
+			node.address = endPoints.get(0);
+			node.token = range.right;
+			node.load = loadMap.get(node.address);
+			if (node.load == null) {
+				node.load = "?";
+			}
 			nodes.add(node);
 			
 			NodeProbe inProbe = clientProvider.getProbe(node.address);
 			if (inProbe != null) {
-				node.token = inProbe.getToken();
 				node.operationMode = inProbe.getOperationMode();
 				node.uptime = getUptimeString(inProbe.getUptime());
 				node.jmx = true;
@@ -88,13 +96,14 @@ public class SystemController extends AbstractBaseController {
 		        node.memoryMax  = String.format("%.2f MB", (double) memory.getMax() / (1024 * 1024));
 		        node.memoryCommited = String.format("%.2f MB", (double) memory.getCommitted() / (1024 * 1024));
 			}
-		}
-		for (String addr : unreachableNodes) {
-			Node node = new Node();
-			node.up = false;
-			node.address = addr;
-			node.load = loadMap.get(addr);
-			nodes.add(node);
+			
+			if (liveNodes.contains(node.address)) {
+				node.up = "UP";
+			} else if (unreachableNodes.contains(node.address)) {
+				node.up = "DOWN";
+			} else {
+				node.up = "?";
+			}
 		}
 		
 		model.put("nodes", nodes);
@@ -174,11 +183,11 @@ public class SystemController extends AbstractBaseController {
 		// Loaded bytes
 		private String load = "";
 		// Status
-		private boolean up = false;
+		private String up = "?";
 		// JMX available
 		private boolean jmx = false;
 		// Token
-		private String token = "";
+		private Token<?> token = null;
 		// Operation
 		private String operationMode = "";
 		// Memory Usage
@@ -194,7 +203,7 @@ public class SystemController extends AbstractBaseController {
 		public String getLoad() {
 			return (load == null) ? "" : load;
 		}
-		public boolean isUp() {
+		public String getUp() {
 			return up;
 		}
 		public boolean isJmx() {
@@ -203,7 +212,7 @@ public class SystemController extends AbstractBaseController {
 		public String getOperationMode() {
 			return operationMode;
 		}
-		public String getToken() {
+		public Token<?> getToken() {
 			return token;
 		}
 		public String getUptime() {

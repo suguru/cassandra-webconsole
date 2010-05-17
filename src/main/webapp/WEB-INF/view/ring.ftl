@@ -29,10 +29,12 @@
 	</td>
 	<td>${node.token?html}</td>
 	<td>${node.operationMode?html}</td>
-	<#if node.up>
+	<#if node.up == "UP">
 	<td class="status up">UP</td>
-	<#else>
+	<#elseif node.up == "DOWN">
 	<td class="status down">DOWN</td>
+	<#else>
+	<td class="status">?</td>
 	</#if>
 	<td class="bytes">${node.load?html}</td>
 	<td class="bytes">${node.memoryUsed} / ${node.memoryMax}</td>
