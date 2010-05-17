@@ -8,7 +8,32 @@
 <a href="./"><strong>${address?html}</strong></a>
 </nav>
 
+<nav class="control">
+<a class="formbox" title="Load Balance" href="loadbalance">Load Balance</a>
+<a class="formbox" title="Cleanup" href="cleanup">Cleanup</a>
+<a class="formbox" title="Compact" href="compact">Compact</a>
+<a class="formbox" title="Move" href="move">Move</a>
+<a class="formbox" title="Decomission" href="decomission">Decomission</a>
+<a class="formbox" title="Drain" href="drain">Drain</a>
+</nav>
+
 <h2>Node Information for ${address}</h2>
+
+<table>
+<caption>Node Stats</caption>
+<tr>
+	<th>Address</th>
+	<th>Token</th>
+	<th>Mode</th>
+	<th>Uptime</th>
+</tr>
+<tr>
+	<td>${address?html}</td>
+	<td>${token?html}</td>
+	<td>${mode?html}</td>
+	<td>${uptime?html}</td>
+</tr>
+</table>
 
 <table>
 <caption>Thread Pools</caption>

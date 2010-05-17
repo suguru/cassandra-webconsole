@@ -40,7 +40,8 @@
 </ul>
 <h2>Administration</h2>
 <ul>
-<li><a href="${contextPath}/keyspace/create" title="Create a Keyspace" class="formbox">Create a keyspace</a></li>
+<li><a href="${contextPath}/keyspace/create" title="Create keyspace" class="formbox">Create keyspace</a></li>
+<li><a href="${contextPath}/token/remove" title="Remove token" class="formbox">Remove token</a></li>
 </ul>
 <h2>Information</h2>
 <ul>

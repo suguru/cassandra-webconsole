@@ -21,6 +21,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class SystemController extends AbstractBaseController {
@@ -114,6 +115,12 @@ public class SystemController extends AbstractBaseController {
 			ModelMap model) {
 		
 		NodeProbe probe = clientProvider.getProbe(address);
+		
+		model.addAttribute("address", address);
+		model.addAttribute("token", probe.getToken());
+		model.addAttribute("mode", probe.getOperationMode());
+		model.addAttribute("uptime", getUptimeString(probe.getUptime()));
+		
 		probe.getColumnFamilyStoreMBeanProxies();
 		Iterator<Entry<String, ColumnFamilyStoreMBean>> iterator = probe.getColumnFamilyStoreMBeanProxies();
 		Map<String, ColumnFamilyStoreMBean> cfMap = new TreeMap<String, ColumnFamilyStoreMBean>();
@@ -213,5 +220,147 @@ public class SystemController extends AbstractBaseController {
 		}
 	}
 	
+	/**
+	 * Prepare executing control
+	 * 
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/{control}", method=RequestMethod.GET)
+	public String prepareControl(
+			@PathVariable("address") String address,
+			@PathVariable("control") String control,
+			ModelMap model) throws Exception {
+		model.put("address", address);
+		model.put("control", control);
+		return "/ring_" + control;
+	}
+	
+	/**
+	 * Execute loadbalance 
+	 * 
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/loadbalance", method=RequestMethod.POST)
+	public String loadbalance(
+			@PathVariable("address") String address,
+			ModelMap model) throws Exception {
+		NodeProbe probe = clientProvider.getProbe(address);
+		probe.loadBalance();
+		model.clear();
+		return "redirect:../";
+	}
+	
+	/**
+	 * Execute cleanup 
+	 * 
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/cleanup", method=RequestMethod.POST)
+	public String cleanup(
+			@PathVariable("address") String address,
+			ModelMap model) throws Exception {
+		NodeProbe probe = clientProvider.getProbe(address);
+		probe.forceTableCleanup();
+		model.clear();
+		return "redirect:./";
+	}
+
+	/**
+	 * Execute compact 
+	 * 
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/compact", method=RequestMethod.POST)
+	public String compact(
+			@PathVariable("address") String address,
+			ModelMap model) throws Exception {
+		NodeProbe probe = clientProvider.getProbe(address);
+		probe.forceTableCompaction();
+		model.clear();
+		return "redirect:./";
+	}
+
+	/**
+	 * Execute drain 
+	 * 
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/drain", method=RequestMethod.POST)
+	public String drain(
+			@PathVariable("address") String address,
+			ModelMap model) throws Exception {
+		NodeProbe probe = clientProvider.getProbe(address);
+		probe.drain();
+		model.clear();
+		return "redirect:./";
+	}
+	
+	/**
+	 * Execute compact 
+	 * 
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/ssion", method=RequestMethod.POST)
+	public String decomission(
+			@PathVariable("address") String address,
+			ModelMap model) throws Exception {
+		NodeProbe probe = clientProvider.getProbe(address);
+		probe.decommission();
+		model.clear();
+		return "redirect:./";
+	}
+
+	/**
+	 * Execute drain 
+	 *
+	 * @param token Token
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/move", method=RequestMethod.POST)
+	public String move(
+			@PathVariable("address") String address,
+			@RequestParam("token") String token,
+			ModelMap model) throws Exception {
+		NodeProbe probe = clientProvider.getProbe(address);
+		probe.move(token);
+		model.clear();
+		return "redirect:./";
+	}
+	
+	/**
+	 * Prepare for removing the token
+	 *
+	 * @param token Token
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/token/remove", method=RequestMethod.GET)
+	public String removeToken(ModelMap model) throws Exception {
+		return "/token_remove";
+	}
+	
+	/**
+	 * Remove the token
+	 *
+	 * @param token Token
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/token/remove", method=RequestMethod.POST)
+	public String removeTokenExecute(
+			@RequestParam("token") String token,
+			ModelMap model) throws Exception {
+		NodeProbe probe = clientProvider.getProbe();
+		probe.removeToken(token);
+		model.clear();
+		return "redirect:./";
+	}
 	
 }
