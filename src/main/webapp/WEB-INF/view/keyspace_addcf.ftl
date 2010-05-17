@@ -41,6 +41,21 @@
 	</select>
 </p>
 
+<p>
+	<label for="comment">Key Cache Size</label>
+	<input type="text" id="keyCache" name="keyCache" class="required number" value="200000" />
+</p>
+
+<p>
+	<label for="comment">Row Cache Size</label>
+	<input type="text" id="rowCache" name="rowCache" class="required number" value="0" />
+</p>
+
+<p id="subComparators">
+	<label for="preloadRowCache">Preload Row Cache</label>
+	<input type="checkbox" id="preloadRowCache" name="preloadRowCache" value="true" />
+</p>
+
 <p class="buttons">
 	<button type="submit" class="submit">Create</button>
 	<button type="button" class="cancel" onclick="$.fn.colorbox.close()">Cancel</button>

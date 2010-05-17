@@ -44,6 +44,9 @@ public class ColumnFamilyController extends AbstractBaseController {
 			@RequestParam("comparator") String comparator,
 			@RequestParam("subComparator") String subComparator,
 			@RequestParam("comment") String comment,
+			@RequestParam("keyCache") double keyCache,
+			@RequestParam("rowCache") double rowCache,
+			@RequestParam(value="preloadRowCache", required=false, defaultValue="false") boolean preloadRowCache,
 			ModelMap model) throws Exception {
 		
 		Client client = clientProvider.getThriftClient();
@@ -67,6 +70,9 @@ public class ColumnFamilyController extends AbstractBaseController {
 		cfdef.setComparator_type(comparator);
 		cfdef.setSubcomparator_type(subComparator);
 		cfdef.setTable(keyspaceName);
+		cfdef.setKey_cache_size(keyCache);
+		cfdef.setRow_cache_size(rowCache);
+		cfdef.setPreload_row_cache(preloadRowCache);
 		
 		client.system_add_column_family(cfdef);
 		
