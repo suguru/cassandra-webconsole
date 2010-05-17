@@ -104,6 +104,21 @@ public class CassandraClientProvider {
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
+		} else {
+			try {
+				// check the connectivity
+				probe.getToken();
+			} catch (RuntimeException e) { 
+				// clean jmx if failed to get token
+				probeMap.remove(host + ":" + port);
+				// retry
+				try {
+					probe = new NodeProbe(host, port);
+					probeMap.put(host + ":" + port, probe);
+				} catch (Exception ee) {
+					return null;
+				}
+			}
 		}
 		return probe;
 	}
