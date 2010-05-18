@@ -20,6 +20,7 @@ public class CassandraProperties {
 	public static final String HOST = "cassandra.host";
 	public static final String JMX_PORT = "cassandra.jmx.port";
 	public static final String THRIFT_PORT = "cassandra.thrift.port";
+	public static final String FRAMED_TRANSPORT = "cassandra.framedTransport";
 	
 	private String fileName = ".cassandra-webconsole";
 	

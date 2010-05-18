@@ -9,6 +9,7 @@ import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.tools.NodeProbe;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -61,12 +62,20 @@ public class CassandraClientProvider {
 			return null;
 		}
 		
-		String host = properties.getProperty("cassandra.host");
-		int port = Integer.parseInt(properties.getProperty("cassandra.thrift.port"));		
+		String host = properties.getProperty(CassandraProperties.HOST);
+		int port = Integer.parseInt(properties.getProperty(CassandraProperties.THRIFT_PORT));
+		
+		// Check usage of framed transport
+		String framed = properties.getProperty(CassandraProperties.FRAMED_TRANSPORT);
+		boolean isFramed = (framed != null && Boolean.valueOf(framed));
 		
 		Client client = th.get();
 		if (client == null) {
 			TTransport transport = new TSocket(host, port);
+			// wrap transport if framed transport is enabled
+			if (isFramed) {
+				transport = new TFramedTransport(transport);
+			}
 			TProtocol protocol = new TBinaryProtocol(transport);
 			transport.open();
 			client = new Client(protocol);
