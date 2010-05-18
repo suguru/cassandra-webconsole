@@ -54,6 +54,7 @@ public class KeyspaceController extends AbstractBaseController {
 			model.put("system", true);
 		} else {
 			List<TokenRange> tokenRange = client.describe_ring(keyspaceName);
+			Collections.sort(tokenRange);
 			model.put("tokenRanges", tokenRange);
 		}
 		
