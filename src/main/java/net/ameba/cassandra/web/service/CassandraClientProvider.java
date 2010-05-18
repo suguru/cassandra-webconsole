@@ -72,6 +72,7 @@ public class CassandraClientProvider {
 		Client client = th.get();
 		if (client == null) {
 			TTransport transport = new TSocket(host, port);
+			((TSocket) transport).setTimeout(10000);
 			// wrap transport if framed transport is enabled
 			if (isFramed) {
 				transport = new TFramedTransport(transport);

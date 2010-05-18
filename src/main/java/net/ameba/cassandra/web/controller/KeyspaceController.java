@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.ameba.cassandra.web.service.CassandraClientProvider;
 
@@ -13,6 +14,7 @@ import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.cassandra.thrift.Cassandra.Client;
+import org.apache.thrift.TException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -29,6 +31,42 @@ public class KeyspaceController extends AbstractBaseController {
 	
 	@Autowired
 	private CassandraClientProvider clientProvider;
+	
+	@RequestMapping("/keyspaces")
+	public String listKeyspaces(
+			@RequestParam("keyspace") String activeKeyspace,
+			@RequestParam("columnFamily") String activeColumnFamily,
+			ModelMap model) throws Exception {
+		
+		try {
+			Client client = clientProvider.getThriftClient();
+			if (client != null) {
+				// Get list of keyspaces
+				Set<String> keyspaceSet = client.describe_keyspaces();
+				List<String> keyspaceList = new ArrayList<String>(keyspaceSet);
+				Collections.sort(keyspaceList);
+				model.addAttribute("keyspaces", client.describe_keyspaces());
+				
+				// Get list of column families from active keyspace.
+				if (activeKeyspace.length() > 0) {
+					Map<String, Map<String, String>> cfmap = client.describe_keyspace(activeKeyspace);
+					List<String> cfList = new ArrayList<String>(cfmap.keySet());
+					Collections.sort(cfList);
+					model.addAttribute("columnFamilies", cfList);
+				}
+				
+			} else {
+				model.addAttribute("keyspaces", new ArrayList<String>());
+			}
+		} catch (TException ex) {
+			model.addAttribute("keyspaces", new ArrayList<String>());
+		}
+		
+		model.addAttribute("activeKeyspace", activeKeyspace);
+		model.addAttribute("activeColumnFamily", activeColumnFamily);
+		
+		return "/keyspace_list";
+	}
 	
 	@RequestMapping(value="/keyspace/{name}/", method=RequestMethod.GET)
 	public String describeKeyspace(
@@ -151,5 +189,5 @@ public class KeyspaceController extends AbstractBaseController {
 		model.clear();
 		return "redirect:../../";
 	}
-	
+
 }

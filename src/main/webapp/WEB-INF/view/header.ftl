@@ -6,9 +6,17 @@
 <script type="text/javascript" src="${contextPath}/js/jquery.js"></script>
 <script type="text/javascript" src="${contextPath}/js/jquery.colorbox.js"></script>
 <script type="text/javascript" src="${contextPath}/js/jquery.validation.js"></script>
-<script type="text/javascript" src="${contextPath}/js/webconsole.js"></script>
 <link rel="stylesheet" href="${contextPath}/css/base.css" type="text/css" />
 <link rel="stylesheet" href="${contextPath}/css/colorbox.css" type="text/css" />
+<script type="text/javascript">
+$(function() {
+	$("a.formbox").colorbox();
+	$("#keyspaces").load(
+		"${contextPath}/keyspaces",
+		{keyspace:'${keyspaceName?default("")?html}', columnFamily:'${columnFamilyName?default("")?html}'}
+	);
+});
+</script>
 </head>
 <body>
 
@@ -19,25 +27,11 @@
 <div id="container">
 
 <div id="menu">
+
 <h2>Keyspaces</h2>
-<ul>
-<#list keyspaces as keyspace>
-<#if keyspaceName?exists && keyspaceName == keyspace>
-<li class ="active"><a href="${contextPath}/keyspace/${keyspace?html}/">${keyspace?html}</a></li>
-<#if columnFamilies?exists>
-<#list columnFamilies as columnFamily>
-<#if columnFamilyName?exists && columnFamilyName == columnFamily>
-<li class="cf active<#if !columnFamily_has_next> last</#if>"><a href="${contextPath}/keyspace/${keyspace?html}/${columnFamily?html}/">${columnFamily?html}</a></li>
-<#else>
-<li class="cf<#if !columnFamily_has_next> last</#if>"><a href="${contextPath}/keyspace/${keyspace?html}/${columnFamily?html}/">${columnFamily?html}</a></li>
-</#if>
-</#list>
-</#if>
-<#else>
-<li><a href="${contextPath}/keyspace/${keyspace?html}/">${keyspace?html}</a></li>
-</#if>
-</#list>
+<ul id="keyspaces">
 </ul>
+
 <h2>Administration</h2>
 <ul>
 <li><a href="${contextPath}/keyspace/create" title="Create keyspace" class="formbox">Create keyspace</a></li>
