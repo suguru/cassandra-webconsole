@@ -10,10 +10,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * ContentTypeヘッダーを修正するためのフィルター
- * @author suguru
- */
 public class NoCacheFilter implements Filter {
 	
 	public NoCacheFilter() {

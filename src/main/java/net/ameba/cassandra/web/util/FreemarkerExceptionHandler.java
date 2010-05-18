@@ -13,8 +13,6 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 
 /**
- * {@link FreemarkerExceptionHandler} は、 Freemarker におけるテンプレート関連例外を
- * 正しく処理するための例外ハンドラクラスです。
  * 
  * @author snamura
  */
@@ -25,8 +23,7 @@ public class FreemarkerExceptionHandler implements TemplateExceptionHandler {
 
 	/*
 	 * (non-Javadoc)
-	 * @see
-	 * freemarker.template.TemplateExceptionHandler#handleTemplateException(freemarker.template.TemplateException,　freemarker.core.Environment, java.io.Writer)
+	 * @see freemarker.template.TemplateExceptionHandler#handleTemplateException(freemarker.template.TemplateException, freemarker.core.Environment, java.io.Writer)
 	 */
 	public void handleTemplateException(
 			TemplateException exception,
