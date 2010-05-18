@@ -1,2 +1,3 @@
 dev
  * Add option for Framed Transport. [#2]
+ * Lazy loading of keyspaces.

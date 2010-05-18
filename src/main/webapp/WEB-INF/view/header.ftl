@@ -42,7 +42,7 @@ $(function() {
 <li <#if menu_info?exists>class="active"</#if>><a href="${contextPath}/info/">System</a></li>
 <li <#if menu_ring?exists>class="active"</#if>><a href="${contextPath}/ring/">Ring</a></li>
 <#if address?exists>
-<li class="cf active last"><a href="${contextPath}/ring/${address?html}">${address?html}</a></li>
+<li class="cf active last"><a href="${contextPath}/ring/${address?html}/">${address?html}</a></li>
 </#if>
 </ul>
 <h2>Other</h2>

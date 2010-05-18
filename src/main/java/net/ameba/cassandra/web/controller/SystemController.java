@@ -36,6 +36,7 @@ public class SystemController extends AbstractBaseController {
 	public void showInfo(ModelMap model) throws Exception {
 		
 		Client client = clientProvider.getThriftClient();
+		
 		model.put("clusterName", client.describe_cluster_name());
 		model.put("version", client.describe_version());
 		
