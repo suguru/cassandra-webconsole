@@ -6,6 +6,7 @@ Project description
 
 Requirements
 -------------------
+  * Cassandra >= trunk (does not work with 0.6)
   * Java >= 1.6
   * Tomcat >= 6.0
     maven2 (compile)
