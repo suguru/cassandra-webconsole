@@ -98,9 +98,9 @@ public class SystemController extends AbstractBaseController {
 		        node.memoryCommited = String.format("%.2f MB", (double) memory.getCommitted() / (1024 * 1024));
 			}
 			
-			if (liveNodes.contains(node.address)) {
+			if (liveNodes.remove(node.address)) {
 				node.up = "UP";
-			} else if (unreachableNodes.contains(node.address)) {
+			} else if (unreachableNodes.remove(node.address)) {
 				node.up = "DOWN";
 			} else {
 				node.up = "?";
@@ -254,10 +254,21 @@ public class SystemController extends AbstractBaseController {
 	 */
 	@RequestMapping(value="/ring/{address}/loadbalance", method=RequestMethod.POST)
 	public String loadbalance(
-			@PathVariable("address") String address,
+			@PathVariable("address") final String address,
 			ModelMap model) throws Exception {
-		NodeProbe probe = clientProvider.getProbe(address);
-		probe.loadBalance();
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe(address);
+				if (probe != null) {
+					try {
+						probe.loadBalance();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
 		model.clear();
 		return "redirect:../";
 	}
@@ -270,10 +281,21 @@ public class SystemController extends AbstractBaseController {
 	 */
 	@RequestMapping(value="/ring/{address}/cleanup", method=RequestMethod.POST)
 	public String cleanup(
-			@PathVariable("address") String address,
+			@PathVariable("address") final String address,
 			ModelMap model) throws Exception {
-		NodeProbe probe = clientProvider.getProbe(address);
-		probe.forceTableCleanup();
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe(address);
+				if (probe != null) {
+					try {
+						probe.forceTableCleanup();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
 		model.clear();
 		return "redirect:./";
 	}
@@ -286,10 +308,21 @@ public class SystemController extends AbstractBaseController {
 	 */
 	@RequestMapping(value="/ring/{address}/compact", method=RequestMethod.POST)
 	public String compact(
-			@PathVariable("address") String address,
+			@PathVariable("address") final String address,
 			ModelMap model) throws Exception {
-		NodeProbe probe = clientProvider.getProbe(address);
-		probe.forceTableCompaction();
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe(address);
+				if (probe != null) {
+					try {
+						probe.forceTableCompaction();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
 		model.clear();
 		return "redirect:./";
 	}
@@ -302,10 +335,21 @@ public class SystemController extends AbstractBaseController {
 	 */
 	@RequestMapping(value="/ring/{address}/drain", method=RequestMethod.POST)
 	public String drain(
-			@PathVariable("address") String address,
+			@PathVariable("address") final String address,
 			ModelMap model) throws Exception {
-		NodeProbe probe = clientProvider.getProbe(address);
-		probe.drain();
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe(address);
+				if (probe != null) {
+					try {
+						probe.drain();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
 		model.clear();
 		return "redirect:./";
 	}
@@ -318,10 +362,21 @@ public class SystemController extends AbstractBaseController {
 	 */
 	@RequestMapping(value="/ring/{address}/ssion", method=RequestMethod.POST)
 	public String decomission(
-			@PathVariable("address") String address,
+			@PathVariable("address") final String address,
 			ModelMap model) throws Exception {
-		NodeProbe probe = clientProvider.getProbe(address);
-		probe.decommission();
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe(address);
+				if (probe != null) {
+					try {
+						probe.decommission();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
 		model.clear();
 		return "redirect:./";
 	}
@@ -335,11 +390,22 @@ public class SystemController extends AbstractBaseController {
 	 */
 	@RequestMapping(value="/ring/{address}/move", method=RequestMethod.POST)
 	public String move(
-			@PathVariable("address") String address,
-			@RequestParam("token") String token,
+			@PathVariable("address") final String address,
+			@RequestParam("token") final String token,
 			ModelMap model) throws Exception {
-		NodeProbe probe = clientProvider.getProbe(address);
-		probe.move(token);
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe(address);
+				if (probe != null) {
+					try {
+						probe.move(token);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
 		model.clear();
 		return "redirect:./";
 	}
@@ -365,10 +431,21 @@ public class SystemController extends AbstractBaseController {
 	 */
 	@RequestMapping(value="/token/remove", method=RequestMethod.POST)
 	public String removeTokenExecute(
-			@RequestParam("token") String token,
+			@RequestParam("token") final String token,
 			ModelMap model) throws Exception {
-		NodeProbe probe = clientProvider.getProbe();
-		probe.removeToken(token);
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe();
+				if (probe != null) {
+					try {
+						probe.removeToken(token);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
 		model.clear();
 		return "redirect:./";
 	}
