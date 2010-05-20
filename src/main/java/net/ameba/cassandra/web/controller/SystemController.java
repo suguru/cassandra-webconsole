@@ -107,6 +107,18 @@ public class SystemController extends AbstractBaseController {
 			}
 		}
 		
+		// List live nodes which are not in range.
+		for (String deadAddress : unreachableNodes) {
+			Node deadNode = new Node();
+			deadNode.address = deadAddress;
+			deadNode.load = loadMap.get(deadAddress);
+			NodeProbe inProbe = clientProvider.getProbe(deadAddress);
+			if (inProbe != null) {
+				deadNode.operationMode = inProbe.getOperationMode();
+				deadNode.uptime = getUptimeString(inProbe.getUptime());
+			}
+		}
+		
 		model.put("nodes", nodes);
 		model.put("menu_ring", Boolean.TRUE);
 
