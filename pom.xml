@@ -98,8 +98,8 @@
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra</artifactId>
 			<scope>system</scope>
-			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apache-cassandra-r947889.jar</systemPath>
-			<version>r947889</version>
+			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apache-cassandra-r947953.jar</systemPath>
+			<version>r947953</version>
 		</dependency>
 
 		<dependency>
