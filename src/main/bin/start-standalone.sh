@@ -2,8 +2,6 @@
 WC_HOME=`dirname $0`
 WC_PORT=8080
 
-echo WC_HOME:${WC_HOME}
-
 CLASSPATH="${WC_HOME}/../webapp/WEB-INF/classes"
 for jar in ${WC_HOME}/../webapp/WEB-INF/lib/*.jar; do
 	CLASSPATH=$CLASSPATH:$jar
@@ -26,5 +24,4 @@ case "`uname`" in
     ;;
 esac
 
-echo ${CLASSPATH}
-exec "${JAVA}" ${JAVA_OPTS} net.ameba.cassandra.web.standalone.StandaloneServer --port=${WC_PORT} --base="${WC_HOME}/../"
+exec "${JAVA}" -cp "${CLASSPATH}" ${JAVA_OPTS} net.ameba.cassandra.web.standalone.StandaloneServer --port=${WC_PORT} --base="${WC_HOME}/../"
