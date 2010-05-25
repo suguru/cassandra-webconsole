@@ -18,13 +18,6 @@
 				<include>*</include>
 			</includes>
 		</fileSet>
-		<fileSet>
-			<directory>src/main/webapp</directory>
-			<outputDirectory>/log</outputDirectory>
-			<includes>
-				<include>*</include>
-			</includes>
-		</fileSet>
 	</fileSets>
 	<dependencySets>
 		<dependencySet>
