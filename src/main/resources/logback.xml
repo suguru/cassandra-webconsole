@@ -2,9 +2,9 @@
 <configuration>
 
 	<appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
-		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</Pattern>
-		</layout>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
 	</appender>
   
 	<logger name="net.ameba">
@@ -12,11 +12,15 @@
 	</logger>
 	
 	<logger name="org.springframework">
+		<level value="warn" />
+	</logger>
+	
+	<logger name="org.mortbay">
 		<level value="info" />
 	</logger>
 	
 	<root>
-		<level value="debug" />
+		<level value="info" />
 		<appender-ref ref="stdout" />
 	</root>
 
