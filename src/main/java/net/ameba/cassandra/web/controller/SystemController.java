@@ -259,6 +259,26 @@ public class SystemController extends AbstractBaseController {
 	}
 	
 	/**
+	 * Prepare executing column family control
+	 * 
+	 * @param model
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/{keyspace}/{columnFamily}/{control}", method=RequestMethod.GET)
+	public String prepareControl(
+			@PathVariable("address") String address,
+			@PathVariable("control") String control,
+			@PathVariable("keyspace") String keyspace,
+			@PathVariable("columnFamily") String columnFamily,
+			ModelMap model) throws Exception {
+		model.put("address", address);
+		model.put("control", control);
+		model.put("keyspace", keyspace);
+		model.put("columnFamily", columnFamily);
+		return "/ring_" + control;
+	}
+	
+	/**
 	 * Execute loadbalance 
 	 * 
 	 * @param model
@@ -367,12 +387,12 @@ public class SystemController extends AbstractBaseController {
 	}
 	
 	/**
-	 * Execute compact 
+	 * Execute decomission 
 	 * 
 	 * @param model
 	 * @throws Exception
 	 */
-	@RequestMapping(value="/ring/{address}/ssion", method=RequestMethod.POST)
+	@RequestMapping(value="/ring/{address}/decomission", method=RequestMethod.POST)
 	public String decomission(
 			@PathVariable("address") final String address,
 			ModelMap model) throws Exception {
@@ -420,6 +440,68 @@ public class SystemController extends AbstractBaseController {
 		});
 		model.clear();
 		return "redirect:./";
+	}
+	
+	/**
+	 * Execute flush
+	 * @param address
+	 * @param token
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/{keyspace}/{columnFamily}/flush", method=RequestMethod.POST)
+	public String flush(
+			@PathVariable("address") final String address,
+			@PathVariable("keyspace") final String keyspace,
+			@PathVariable("columnFamily") final String columnFamily,
+			ModelMap model) throws Exception {
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe(address);
+				if (probe != null) {
+					try {
+						probe.forceTableFlush(keyspace, columnFamily);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
+		model.clear();
+		return "redirect:../../";
+	}
+	
+	/**
+	 * Execute repair
+	 * @param address
+	 * @param token
+	 * @param model
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value="/ring/{address}/{keyspace}/{columnFamily}/repair", method=RequestMethod.POST)
+	public String repair(
+			@PathVariable("address") final String address,
+			@PathVariable("keyspace") final String keyspace,
+			@PathVariable("columnFamily") final String columnFamily,
+			ModelMap model) throws Exception {
+		cassandraService.scheduleExecution(new Runnable() {
+			@Override
+			public void run() {
+				NodeProbe probe = clientProvider.getProbe(address);
+				if (probe != null) {
+					try {
+						probe.forceTableRepair(keyspace, columnFamily);
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		});
+		model.clear();
+		return "redirect:../../";
 	}
 	
 	/**

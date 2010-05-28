@@ -65,6 +65,7 @@
 	<th colspan="3">Memtable</th>
 	<th colspan="3">Compacted</th>
 	<th rowspan="2">Pending</th>
+	<th rowspan="2">&nbsp;</th>
 </tr>
 <tr>
 	<th>Data</th>
@@ -76,6 +77,7 @@
 </tr>
 <#list cfmap?keys as key>
 <#assign cf = cfmap[key]/>
+<#assign keysplit = key?split(":") />
 <tr>
 	<td>${key?html}</td>
 	<td class="bytes">${cf.liveDiskSpaceUsed / 1024 / 1024} MB</td>
@@ -89,6 +91,10 @@
 	<td class="bytes">${cf.minRowCompactedSize / 1024 / 1024} MB</td>
 	<td class="bytes">${cf.meanRowCompactedSize / 1024 / 1024} MB</td>
 	<td class="number">${cf.pendingTasks}</td>
+	<td>
+		<a class="formbox" href="${keysplit[0]?html}/${keysplit[1]?html}/flush" title="Flush ${key?html}">Flush</a>
+		<a class="formbox" href="${keysplit[0]?html}/${keysplit[1]?html}/repair" title="Repair ${key?html}">Repair</a>
+	</td>
 </tr>
 </#list>
 </table>
