@@ -1,14 +1,16 @@
 package net.ameba.cassandra.web.controller;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import net.ameba.cassandra.web.service.CassandraClientProvider;
 
@@ -18,6 +20,8 @@ import org.apache.cassandra.dht.Range;
 import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.tools.NodeProbe;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -28,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class SystemController extends AbstractBaseController {
+	
+	private static final Logger log = LoggerFactory.getLogger(SystemController.class);
 
 	@Autowired
 	private CassandraClientProvider clientProvider;
@@ -145,12 +151,20 @@ public class SystemController extends AbstractBaseController {
 		
 		probe.getColumnFamilyStoreMBeanProxies();
 		Iterator<Entry<String, ColumnFamilyStoreMBean>> iterator = probe.getColumnFamilyStoreMBeanProxies();
-		Map<String, ColumnFamilyStoreMBean> cfMap = new TreeMap<String, ColumnFamilyStoreMBean>();
+		
+		Map<String, Map<String, ColumnFamilyStoreMBean>> cfparent = new TreeMap<String, Map<String,ColumnFamilyStoreMBean>>();
+		
 		while (iterator.hasNext()) {
 			Entry<String, ColumnFamilyStoreMBean> entry = iterator.next();
 			String keyspace = entry.getKey();
 			String columnFamily = entry.getValue().getColumnFamilyName();
-			cfMap.put(keyspace + ":" + columnFamily, entry.getValue());
+			
+			Map<String, ColumnFamilyStoreMBean> cfmap = cfparent.get(keyspace);
+			if (cfmap == null) {
+				cfmap = new TreeMap<String, ColumnFamilyStoreMBean>();
+				cfparent.put(keyspace, cfmap);
+			}
+			cfmap.put(columnFamily, entry.getValue());
 		}
 		
 		Iterator<Entry<String, IExecutorMBean>> tpIterator = probe.getThreadPoolMBeanProxies();
@@ -160,10 +174,25 @@ public class SystemController extends AbstractBaseController {
 			tpMap.put(entry.getKey(), entry.getValue());
 		}
 		
-		model.addAttribute("cfmap", cfMap);
+		model.addAttribute("cfparent", cfparent);
 		model.addAttribute("tpmap", tpMap);
 		model.addAttribute("address", address);
 		model.addAttribute("menu_ring", true);
+		
+		// TODO not implemented yet
+//		model.addAttribute("streamDestinations", probe.getStreamDestinations());
+//		model.addAttribute("streamSources", probe.getStreamSources());
+		model.addAttribute("currentGenerationNumber", probe.getCurrentGenerationNumber());
+		
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		PrintStream ps = new PrintStream(bout);
+		probe.getCompactionThreshold(ps);
+		ps.flush();
+		String compactionThreshold = new String(bout.toByteArray());
+		if (compactionThreshold.startsWith("Current compaction threshold: ")) {
+			compactionThreshold = compactionThreshold.substring(30);
+		}
+		model.addAttribute("compactionThreshold", compactionThreshold);
 		
 		return "/ring_node";
 	}
@@ -296,7 +325,7 @@ public class SystemController extends AbstractBaseController {
 					try {
 						probe.loadBalance();
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed to loadbalance " + address, e);
 					}
 				}
 			}
@@ -323,7 +352,7 @@ public class SystemController extends AbstractBaseController {
 					try {
 						probe.forceTableCleanup();
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed to cleanup " + address, e);
 					}
 				}
 			}
@@ -350,7 +379,7 @@ public class SystemController extends AbstractBaseController {
 					try {
 						probe.forceTableCompaction();
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed force table compaction " + address, e);
 					}
 				}
 			}
@@ -377,7 +406,7 @@ public class SystemController extends AbstractBaseController {
 					try {
 						probe.drain();
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed to drain " + address, e);
 					}
 				}
 			}
@@ -404,7 +433,7 @@ public class SystemController extends AbstractBaseController {
 					try {
 						probe.decommission();
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed to decomission " + address, e);
 					}
 				}
 			}
@@ -433,7 +462,7 @@ public class SystemController extends AbstractBaseController {
 					try {
 						probe.move(token);
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed to move " + token, e);
 					}
 				}
 			}
@@ -456,15 +485,16 @@ public class SystemController extends AbstractBaseController {
 			@PathVariable("keyspace") final String keyspace,
 			@PathVariable("columnFamily") final String columnFamily,
 			ModelMap model) throws Exception {
+		final String[] columnFamilies = columnFamily.split(",");
 		cassandraService.scheduleExecution(new Runnable() {
 			@Override
 			public void run() {
 				NodeProbe probe = clientProvider.getProbe(address);
 				if (probe != null) {
 					try {
-						probe.forceTableFlush(keyspace, columnFamily);
+						probe.forceTableFlush(keyspace, columnFamilies);
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed to flush column families " + keyspace + ":" + columnFamilies, e);
 					}
 				}
 			}
@@ -487,15 +517,16 @@ public class SystemController extends AbstractBaseController {
 			@PathVariable("keyspace") final String keyspace,
 			@PathVariable("columnFamily") final String columnFamily,
 			ModelMap model) throws Exception {
+		final String[] columnFamilies = columnFamily.split(",");
 		cassandraService.scheduleExecution(new Runnable() {
 			@Override
 			public void run() {
 				NodeProbe probe = clientProvider.getProbe(address);
 				if (probe != null) {
 					try {
-						probe.forceTableRepair(keyspace, columnFamily);
+						probe.forceTableRepair(keyspace, columnFamilies);
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed to repair column families " + keyspace + ":" + columnFamilies, e);
 					}
 				}
 			}
@@ -535,7 +566,7 @@ public class SystemController extends AbstractBaseController {
 					try {
 						probe.removeToken(token);
 					} catch (Exception e) {
-						throw new RuntimeException(e);
+						log.error("Failed to remove token " + token, e);
 					}
 				}
 			}

@@ -328,3 +328,8 @@ button.cancel:hover {
 	-webkit-border-radius: 0 0 0 6px;
 	-moz-border-radius: 0 0 0 6px;
 }
+
+div.nodeCfStore nav {
+	display: block;
+	padding-bottom: 2em;
+}

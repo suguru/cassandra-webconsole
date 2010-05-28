@@ -1,5 +1,36 @@
 <#include "header.ftl">
 
+<script type="text/javascript">
+function checkAll(target)
+{
+	var boxes = target.find("input[type=checkbox]");
+	if (boxes.attr("checked"))
+	{
+		boxes.attr("checked", false);
+	}
+	else
+	{
+		boxes.attr("checked", true);
+	}
+}
+function control(target, keyspace, method)
+{
+	var cf = "";
+	target.find("input[type=checkbox]").each(function() {
+		if ($(this).attr("checked"))
+		{
+			if (cf != "") cf = cf + ",";
+			cf = cf + $(this).val();
+		}
+	});
+	$.fn.colorbox({
+		href: keyspace + '/' + cf + '/' + method,
+		title: method + ' column families',
+		
+	});
+}
+</script>
+
 <nav class="path">
 <a href="../../">Top</a>
 &gt;
@@ -26,12 +57,16 @@
 	<th>Token</th>
 	<th>Mode</th>
 	<th>Uptime</th>
+	<th>Generation Number</th>
+	<th>Compaction Threshold</th>
 </tr>
 <tr>
 	<td>${address?html}</td>
 	<td>${token?html}</td>
 	<td>${mode?html}</td>
 	<td>${uptime?html}</td>
+	<td>${currentGenerationNumber}</td>
+	<td>${compactionThreshold}</td>
 </tr>
 </table>
 
@@ -54,8 +89,12 @@
 </#list>
 </table>
 
+<h2>Column Family Store</h2>
+<#list cfparent?keys as key>
+<#assign cfmap = cfparent[key]/>
+<div id="cf${key?html}" class="nodeCfStore">
 <table>
-<caption>Column Family Store</caption>
+<caption>${key?html}</caption>
 <tr>
 	<th rowspan="2">Column Family</th>
 	<th rowspan="2">Disk</th>
@@ -65,7 +104,6 @@
 	<th colspan="3">Memtable</th>
 	<th colspan="3">Compacted</th>
 	<th rowspan="2">Pending</th>
-	<th rowspan="2">&nbsp;</th>
 </tr>
 <tr>
 	<th>Data</th>
@@ -75,11 +113,10 @@
 	<th>Min</th>
 	<th>Mean</th>
 </tr>
-<#list cfmap?keys as key>
-<#assign cf = cfmap[key]/>
-<#assign keysplit = key?split(":") />
+<#list cfmap?keys as cfname>
+<#assign cf = cfmap[cfname]/>
 <tr>
-	<td>${key?html}</td>
+	<td><input type="checkbox" name="target" id="${key?html}${cfname?html}" value="${cfname?html}" /> <label for="${key?html}${cfname?html}">${cfname?html}</label></td>
 	<td class="bytes">${cf.liveDiskSpaceUsed / 1024 / 1024} MB</td>
 	<td class="number">${cf.liveSSTableCount}</td>
 	<td class="number">${cf.readCount}</td>
@@ -91,11 +128,14 @@
 	<td class="bytes">${cf.minRowCompactedSize / 1024 / 1024} MB</td>
 	<td class="bytes">${cf.meanRowCompactedSize / 1024 / 1024} MB</td>
 	<td class="number">${cf.pendingTasks}</td>
-	<td>
-		<a class="formbox" href="${keysplit[0]?html}/${keysplit[1]?html}/flush" title="Flush ${key?html}">Flush</a>
-		<a class="formbox" href="${keysplit[0]?html}/${keysplit[1]?html}/repair" title="Repair ${key?html}">Repair</a>
-	</td>
 </tr>
 </#list>
 </table>
+<nav>
+<button type="button" onclick="checkAll($('#cf${key?html}'))">Check all</button>
+<button type="button" onclick="control($('#cf${key?html}'), '${key?html}', 'flush')">Flush</button>
+<button type="button" onclick="control($('#cf${key?html}'), '${key?html}', 'repair')">Repair</button>
+</nav>
 </div>
+
+</#list>
