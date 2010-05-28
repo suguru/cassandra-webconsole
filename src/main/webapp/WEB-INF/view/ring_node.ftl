@@ -104,6 +104,7 @@ function control(target, keyspace, method)
 	<th colspan="3">Memtable</th>
 	<th colspan="3">Compacted</th>
 	<th rowspan="2">Pending</th>
+	<th rowspan="2">Latency Histogram</th>
 </tr>
 <tr>
 	<th>Data</th>
@@ -128,6 +129,10 @@ function control(target, keyspace, method)
 	<td class="bytes">${cf.minRowCompactedSize / 1024 / 1024} MB</td>
 	<td class="bytes">${cf.meanRowCompactedSize / 1024 / 1024} MB</td>
 	<td class="number">${cf.pendingTasks}</td>
+	<td>
+		R:<span class="inlinespark"><#list cf.lifetimeReadLatencyHistogramMicros as v>${v}<#if v_has_next>,</#if></#list></span>
+		W:<span class="inlinespark"><#list cf.lifetimeWriteLatencyHistogramMicros as v>${v}<#if v_has_next>,</#if></#list></span>
+	</td>
 </tr>
 </#list>
 </table>
@@ -139,3 +144,7 @@ function control(target, keyspace, method)
 </div>
 
 </#list>
+
+<script type="text/javascript">
+$("span.inlinespark").sparkline('html', {type:"bar",barWidth:2,barSpacing:0});
+</script>

@@ -6,6 +6,7 @@
 <script type="text/javascript" src="${contextPath}/js/jquery.js"></script>
 <script type="text/javascript" src="${contextPath}/js/jquery.colorbox.js"></script>
 <script type="text/javascript" src="${contextPath}/js/jquery.validation.js"></script>
+<script type="text/javascript" src="${contextPath}/js/jquery.sparkline.js"></script>
 <link rel="stylesheet" href="${contextPath}/css/base.css" type="text/css" />
 <link rel="stylesheet" href="${contextPath}/css/colorbox.css" type="text/css" />
 <script type="text/javascript">
