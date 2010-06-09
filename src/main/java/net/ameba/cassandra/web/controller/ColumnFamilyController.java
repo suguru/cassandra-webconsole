@@ -251,6 +251,34 @@ public class ColumnFamilyController extends AbstractBaseController {
 		
 	}
 	
+	@RequestMapping(value="/keyspace/{keyspaceName}/{columnFamilyName}/truncate", method=RequestMethod.GET)
+	public String truncateColyumnFamily(
+			@PathVariable("keyspaceName") String keyspaceName,
+			@PathVariable("columnFamilyName") String columnFamilyName,
+			ModelMap model) throws Exception {
+		
+		model.addAttribute("keyspaceName", keyspaceName);
+		model.addAttribute("columnFamilyName", columnFamilyName);
+		
+		return "/columnfamily_truncate";
+	}
+	
+	@RequestMapping(value="/keyspace/{keyspaceName}/{columnFamilyName}/truncate", method=RequestMethod.POST)
+	public String truncateColumnFamilyExecute(
+			@PathVariable("keyspaceName") String keyspaceName,
+			@PathVariable("columnFamilyName") String columnFamilyName,
+			ModelMap model) throws Exception {
+		
+		Client client = clientProvider.getThriftClient();
+		client.set_keyspace(keyspaceName);
+		client.truncate(
+				columnFamilyName
+		);
+		model.clear();
+		return "redirect:./";
+		
+	}
+	
 	public static class KeySliceType {
 		private String key;
 		private String keyHex;

@@ -11,6 +11,7 @@
 <nav class="control">
 <a class="formbox" title="Rename Column Family" href="rename">Rename Column Family</a>
 <a class="formbox" title="Drop Column Family" href="drop">Drop Column Family</a>
+<a class="formbox" title="Truncate Column Family" href="truncate">Truncate Column Family</a>
 </nav>
 
 <#if system?exists>
