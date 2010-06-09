@@ -149,6 +149,7 @@ public class SystemController extends AbstractBaseController {
 		model.addAttribute("mode", probe.getOperationMode());
 		model.addAttribute("uptime", getUptimeString(probe.getUptime()));
 		
+		// Column family store
 		probe.getColumnFamilyStoreMBeanProxies();
 		Iterator<Entry<String, ColumnFamilyStoreMBean>> iterator = probe.getColumnFamilyStoreMBeanProxies();
 		
@@ -167,6 +168,7 @@ public class SystemController extends AbstractBaseController {
 			cfmap.put(columnFamily, entry.getValue());
 		}
 		
+		// Thread pool stats
 		Iterator<Entry<String, IExecutorMBean>> tpIterator = probe.getThreadPoolMBeanProxies();
 		Map<String, IExecutorMBean> tpMap = new TreeMap<String, IExecutorMBean>();
 		while (tpIterator.hasNext()) {

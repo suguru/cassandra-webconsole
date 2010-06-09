@@ -213,8 +213,8 @@ public class ColumnFamilyController extends AbstractBaseController {
 			ModelMap model) throws Exception {
 		
 		Client client = clientProvider.getThriftClient();
+		client.set_keyspace(keyspaceName);
 		client.system_rename_column_family(
-				keyspaceName,
 				originalName,
 				columnFamilyName
 		);
@@ -244,7 +244,6 @@ public class ColumnFamilyController extends AbstractBaseController {
 		Client client = clientProvider.getThriftClient();
 		client.set_keyspace(keyspaceName);
 		client.system_drop_column_family(
-				keyspaceName,
 				columnFamilyName
 		);
 		model.clear();
