@@ -90,16 +90,16 @@
 			<groupId>org.apache.thrift</groupId>
 			<artifactId>libthrift</artifactId>
 			<scope>system</scope>
-			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/libthrift-r917130.jar</systemPath>
-			<version>r917130</version>
+			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/libthrift-r959516.jar</systemPath>
+			<version>r959516</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra</artifactId>
 			<scope>system</scope>
-			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apache-cassandra-r952657.jar</systemPath>
-			<version>r952657</version>
+			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apache-cassandra-0.7.0-beta2.jar</systemPath>
+			<version>0.7.0-beta2</version>
 		</dependency>
 
 		<dependency>

@@ -22,22 +22,24 @@
 <p>
 	<label for="comparator">Comparator</label>
 	<select name="comparator" id="comparator">
-		<option value="org.apache.cassandra.db.marshal.UTF8Type">UTF8</option>
-		<option value="org.apache.cassandra.db.marshal.LongType">Long</option>
-		<option value="org.apache.cassandra.db.marshal.LexicalUUIDType">UUID</option>
-		<option value="org.apache.cassandra.db.marshal.TimeUUIDType">TimeUUID</option>
-		<option value="org.apache.cassandra.db.marshal.AsciiType">Ascii</option>
+		<option value="BytesType">BytesType</option>
+		<option value="UTF8Type">UTF8</option>
+		<option value="LongType">Long</option>
+		<option value="LexicalUUIDType">UUID</option>
+		<option value="TimeUUIDType">TimeUUID</option>
+		<option value="AsciiType">Ascii</option>
 	</select>
 </p>
 
 <p id="subComparators">
 	<label for="subComparator">Sub Comparator</label>
 	<select name="subComparator" id="subComparator">
-		<option value="org.apache.cassandra.db.marshal.UTF8Type">UTF8</option>
-		<option value="org.apache.cassandra.db.marshal.LongType">Long</option>
-		<option value="org.apache.cassandra.db.marshal.LexicalUUIDType">UUID</option>
-		<option value="org.apache.cassandra.db.marshal.TimeUUIDType">TimeUUID</option>
-		<option value="org.apache.cassandra.db.marshal.AsciiType">Ascii</option>
+		<option value="BytesType">BytesType</option>
+		<option value="UTF8Type">UTF8</option>
+		<option value="LongType">Long</option>
+		<option value="LexicalUUIDType">UUID</option>
+		<option value="TimeUUIDType">TimeUUID</option>
+		<option value="AsciiType">Ascii</option>
 	</select>
 </p>
 

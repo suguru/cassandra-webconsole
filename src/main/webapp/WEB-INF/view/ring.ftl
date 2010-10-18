@@ -11,7 +11,7 @@
 <tr>
 	<th>Address</th>
 	<th>Token</th>
-	<th>Mode</th>
+	<th>State</th>
 	<th>Status</th>
 	<th>Load</th>
 	<th>Heap</th>
@@ -28,10 +28,10 @@
 	</#if>
 	</td>
 	<td>${node.token?html}</td>
-	<td>${node.operationMode?html}</td>
-	<#if node.up == "UP">
+	<td>${node.state?html}</td>
+	<#if node.up == "up">
 	<td class="status up">UP</td>
-	<#elseif node.up == "DOWN">
+	<#elseif node.up == "down">
 	<td class="status down">DOWN</td>
 	<#else>
 	<td class="status">?</td>

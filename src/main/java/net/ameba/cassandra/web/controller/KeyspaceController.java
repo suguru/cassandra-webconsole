@@ -3,17 +3,16 @@ package net.ameba.cassandra.web.controller;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import net.ameba.cassandra.web.service.CassandraClientProvider;
 
-import org.apache.cassandra.locator.RackAwareStrategy;
-import org.apache.cassandra.locator.RackUnawareStrategy;
+import org.apache.cassandra.locator.NetworkTopologyStrategy;
+import org.apache.cassandra.locator.OldNetworkTopologyStrategy;
+import org.apache.cassandra.locator.SimpleStrategy;
+import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
-import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.thrift.TException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -41,25 +40,22 @@ public class KeyspaceController extends AbstractBaseController {
 		try {
 			Client client = clientProvider.getThriftClient();
 			if (client != null) {
-				// Get list of keyspaces
-				Set<String> keyspaceSet = client.describe_keyspaces();
-				List<String> keyspaceList = new ArrayList<String>(keyspaceSet);
-				Collections.sort(keyspaceList);
+				//Collections.sort(keyspaceSet);
 				model.addAttribute("keyspaces", client.describe_keyspaces());
 				
 				// Get list of column families from active keyspace.
 				if (activeKeyspace.length() > 0) {
-					Map<String, Map<String, String>> cfmap = client.describe_keyspace(activeKeyspace);
-					List<String> cfList = new ArrayList<String>(cfmap.keySet());
+					KsDef ksdef = client.describe_keyspace(activeKeyspace);
+					List<CfDef> cfList = new ArrayList<CfDef>(ksdef.getCf_defs());
 					Collections.sort(cfList);
 					model.addAttribute("columnFamilies", cfList);
 				}
 				
 			} else {
-				model.addAttribute("keyspaces", new ArrayList<String>());
+				model.addAttribute("keyspaces", new ArrayList<KsDef>());
 			}
 		} catch (TException ex) {
-			model.addAttribute("keyspaces", new ArrayList<String>());
+			model.addAttribute("keyspaces", new ArrayList<KsDef>());
 		}
 		
 		model.addAttribute("activeKeyspace", activeKeyspace);
@@ -76,15 +72,9 @@ public class KeyspaceController extends AbstractBaseController {
 		Client client = clientProvider.getThriftClient();
 		
 		// Getting keyspace information
-		Map<String, Map<String, String>> descriptionMap = client.describe_keyspace(keyspaceName);
-		model.put("describeMap", descriptionMap);
+		KsDef ksDef = client.describe_keyspace(keyspaceName);
+		model.put("keyspace", ksDef);
 		model.put("keyspaceName", keyspaceName);
-		
-		// Extracting list of column families
-		List<String> columnFamilies = new ArrayList<String>(descriptionMap.size());
-		columnFamilies.addAll(descriptionMap.keySet());
-		Collections.sort(columnFamilies);
-		model.put("columnFamilies", columnFamilies);
 		
 		// Check the system keyspace
 		boolean isSystem = cassandraService.isSystemKeyspace(keyspaceName);
@@ -119,23 +109,20 @@ public class KeyspaceController extends AbstractBaseController {
 			throw new IllegalArgumentException("Name must not be empty");
 		}
 		
-		KsDef ksDef = new KsDef();
-		ksDef.setName(name);
-		ksDef.setReplication_factor(replicationFactor);
-		
 		Class<?> strategyClass = null;
-		if (strategy.equals("Rackaware")) {
-			strategyClass = RackAwareStrategy.class;
-		} else {
-			strategyClass = RackUnawareStrategy.class;
+		if (strategy.equals("Simple")) {
+			strategyClass = SimpleStrategy.class;
+		} else if (strategy.equals("NetworkTopology")) {
+			strategyClass = NetworkTopologyStrategy.class;
+		} else if (strategy.equals("OldNetworkTopology")) {
+			strategyClass = OldNetworkTopologyStrategy.class;
 		}
-		ksDef.setStrategy_class(strategyClass.getName());
-		ksDef.setCf_defs(new ArrayList<CfDef>());
 		
+		KsDef ksDef = new KsDef(name, strategyClass.getName(), replicationFactor, new ArrayList<CfDef>());
 		client.system_add_keyspace(ksDef);
 		
 		model.clear();
-		return "redirect:./" + name + "/";
+		return "redirect:/keyspace/" + name + "/";
 	}
 
 	@RequestMapping(value="/keyspace/{name}/rename", method=RequestMethod.GET)
@@ -164,7 +151,7 @@ public class KeyspaceController extends AbstractBaseController {
 		client.system_rename_keyspace(originalName, name);
 		
 		model.clear();
-		return "redirect:../" + name + "/";
+		return "redirect:/keyspace/" + name + "/";
 	}
 
 	@RequestMapping(value="/keyspace/{name}/drop", method=RequestMethod.GET)
@@ -187,7 +174,7 @@ public class KeyspaceController extends AbstractBaseController {
 		client.system_drop_keyspace(keyspaceName);
 		
 		model.clear();
-		return "redirect:../../";
+		return "redirect:/";
 	}
 
 }

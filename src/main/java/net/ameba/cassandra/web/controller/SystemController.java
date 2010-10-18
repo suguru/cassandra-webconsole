@@ -1,7 +1,5 @@
 package net.ameba.cassandra.web.controller;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,7 +14,6 @@ import net.ameba.cassandra.web.service.CassandraClientProvider;
 
 import org.apache.cassandra.concurrent.IExecutorMBean;
 import org.apache.cassandra.db.ColumnFamilyStoreMBean;
-import org.apache.cassandra.dht.Range;
 import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.tools.NodeProbe;
@@ -63,6 +60,7 @@ public class SystemController extends AbstractBaseController {
 	 * @param model
 	 * @throws Exception
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@RequestMapping(value="/ring/", method=RequestMethod.GET)
 	public void describeRing(ModelMap model) throws Exception {
 		
@@ -71,21 +69,36 @@ public class SystemController extends AbstractBaseController {
 			// TODO JMX Connection failed
 			throw new RuntimeException("JMX Connection failed.");
 		}
-		Set<String> liveNodes = probe.getLiveNodes();
-		Set<String> unreachableNodes = probe.getUnreachableNodes();
-		Map<String, String> loadMap = probe.getLoadMap();
-		Map<Range, List<String>> rangeMap = probe.getRangeToEndpointMap(null);
-		List<Node> nodes = new ArrayList<Node>(liveNodes.size() + unreachableNodes.size());
-		List<Range> ranges = new ArrayList<Range>(rangeMap.keySet());
-		Collections.sort(ranges);
 		
-		for (Range range : ranges) {
+		Set<String> liveNodes = probe.getLiveNodes();
+		Set<String> deadNodes = probe.getUnreachableNodes();
+		Set<String> joiningNodes = probe.getJoiningNodes();
+		Set<String> leavingNodes = probe.getLeavingNodes();
+		Map<String, String> loadMap = probe.getLoadMap();
+		
+		Map<Token, String> endpointMap = probe.getTokenToEndpointMap();
+		List<Node> nodes = new ArrayList<Node>(endpointMap.size());
+		List<Token> sortedTokens = new ArrayList<Token>(endpointMap.keySet());
+		Collections.sort(sortedTokens);
+
+		for (Object token : sortedTokens) {
 			
-			List<String> endPoints = rangeMap.get(range);
+			String primaryEndpoint = endpointMap.get(token);
+
 			Node node = new Node();
-			node.address = endPoints.get(0);
-			node.token = range.right;
+			node.address = primaryEndpoint;
+			node.token = token.toString();
 			node.load = loadMap.get(node.address);
+			node.up = 
+				liveNodes.contains(primaryEndpoint) ? "up" :
+				deadNodes.contains(primaryEndpoint) ? "down" :
+                "?";
+			
+			node.state =
+				joiningNodes.contains(primaryEndpoint) ? "Joining" :
+				leavingNodes.contains(primaryEndpoint) ? "Leaving" :
+				"Normal";
+			
 			if (node.load == null) {
 				node.load = "?";
 			}
@@ -103,18 +116,10 @@ public class SystemController extends AbstractBaseController {
 		        node.memoryMax  = String.format("%.2f MB", (double) memory.getMax() / (1024 * 1024));
 		        node.memoryCommited = String.format("%.2f MB", (double) memory.getCommitted() / (1024 * 1024));
 			}
-			
-			if (liveNodes.remove(node.address)) {
-				node.up = "UP";
-			} else if (unreachableNodes.remove(node.address)) {
-				node.up = "DOWN";
-			} else {
-				node.up = "?";
-			}
 		}
 		
 		// List live nodes which are not in range.
-		for (String deadAddress : unreachableNodes) {
+		for (String deadAddress : deadNodes) {
 			Node deadNode = new Node();
 			deadNode.address = deadAddress;
 			deadNode.load = loadMap.get(deadAddress);
@@ -186,15 +191,17 @@ public class SystemController extends AbstractBaseController {
 //		model.addAttribute("streamSources", probe.getStreamSources());
 		model.addAttribute("currentGenerationNumber", probe.getCurrentGenerationNumber());
 		
+		/*
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		PrintStream ps = new PrintStream(bout);
-		probe.getCompactionThreshold(ps);
+		probe.getCompactionThreshold(ps, null, null);
 		ps.flush();
 		String compactionThreshold = new String(bout.toByteArray());
 		if (compactionThreshold.startsWith("Current compaction threshold: ")) {
 			compactionThreshold = compactionThreshold.substring(30);
 		}
 		model.addAttribute("compactionThreshold", compactionThreshold);
+		*/
 		
 		return "/ring_node";
 	}
@@ -228,10 +235,12 @@ public class SystemController extends AbstractBaseController {
 		private String load = "";
 		// Status
 		private String up = "?";
+		// State
+		private String state = "";
 		// JMX available
 		private boolean jmx = false;
 		// Token
-		private Token<?> token = null;
+		private String token = null;
 		// Operation
 		private String operationMode = "";
 		// Memory Usage
@@ -256,7 +265,7 @@ public class SystemController extends AbstractBaseController {
 		public String getOperationMode() {
 			return operationMode;
 		}
-		public Token<?> getToken() {
+		public String getToken() {
 			return token;
 		}
 		public String getUptime() {
@@ -270,6 +279,9 @@ public class SystemController extends AbstractBaseController {
 		}
 		public String getMemoryUsed() {
 			return memoryUsed;
+		}
+		public String getState() {
+			return state;
 		}
 	}
 	
@@ -333,7 +345,7 @@ public class SystemController extends AbstractBaseController {
 			}
 		});
 		model.clear();
-		return "redirect:../";
+		return "redirect:/ring/";
 	}
 	
 	/**
@@ -360,7 +372,7 @@ public class SystemController extends AbstractBaseController {
 			}
 		});
 		model.clear();
-		return "redirect:./";
+		return "redirect:/ring/" + address + "/";
 	}
 
 	/**
@@ -387,7 +399,7 @@ public class SystemController extends AbstractBaseController {
 			}
 		});
 		model.clear();
-		return "redirect:./";
+		return "redirect:/ring/" + address + "/";
 	}
 
 	/**
@@ -441,7 +453,7 @@ public class SystemController extends AbstractBaseController {
 			}
 		});
 		model.clear();
-		return "redirect:./";
+		return "redirect:/" + address + "/";
 	}
 
 	/**
@@ -470,7 +482,7 @@ public class SystemController extends AbstractBaseController {
 			}
 		});
 		model.clear();
-		return "redirect:./";
+		return "redirect:/ring/" + address + "/";
 	}
 	
 	/**
@@ -502,7 +514,7 @@ public class SystemController extends AbstractBaseController {
 			}
 		});
 		model.clear();
-		return "redirect:../../";
+		return "redirect:/ring/" + address + "/";
 	}
 	
 	/**
@@ -534,7 +546,7 @@ public class SystemController extends AbstractBaseController {
 			}
 		});
 		model.clear();
-		return "redirect:../../";
+		return "redirect:/ring/" + address + "/";
 	}
 	
 	/**
@@ -574,7 +586,7 @@ public class SystemController extends AbstractBaseController {
 			}
 		});
 		model.clear();
-		return "redirect:./";
+		return "redirect:/ring/";
 	}
 	
 }

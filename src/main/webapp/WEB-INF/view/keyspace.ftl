@@ -3,7 +3,7 @@
 <nav class="path">
 <a href="../../">Top</a>
 &gt;
-<a href="./"><strong>${keyspaceName?html}</strong></a>
+<a href="./"><strong>${keyspace.name?html}</strong></a>
 </nav>
 
 <nav class="control">
@@ -14,14 +14,29 @@
 
 <h2>Column Families</h2>
 
-<#list describeMap?keys as key>
-<#assign map = describeMap[key]>
+<#list keyspace.cf_defs as cf>
 <table class="keyspace">
-<caption><a href="./${key?html}/">${key?html}</a></caption>
-<#list map?keys as key>
+<caption><a href="./${cf.name?html}/">${cf.name?html}</a></caption>
 <tr>
-<th>${key?html}</th>
-<td>${map[key]?html}</td>
+<th>Id</th>
+<th>ColumnType</th>
+<th>Comparator</th>
+</tr>
+<tr>
+<td>${cf.id}</td>
+<td>${cf.column_type}</td>
+<td>${cf.comparator_type}</td>
+</tr>
+<tr>
+<th colspan="3">Comment</th>
+</tr>
+<tr>
+<td colspan="3">${cf.comment?html}</td>
+</tr>
+<#list cf.column_metadata as cmeta>
+<tr>
+<th>${cmeta.index_name?html}</th>
+<td>${cmeta.index_type?html}</td>
 </tr>
 </#list>
 </table>

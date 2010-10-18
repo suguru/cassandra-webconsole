@@ -14,8 +14,9 @@
 <p>
 	<label for="strategy" class="required">Strategy</label>
 	<select name="strategy">
-		<option value="RackUnaware">Rack Unaware</option>
-		<option value="RackAware">Rack Aware</option>
+		<option value="Simple">Simple</option>
+		<option value="NetworkTopology">NetworkTopology</option>
+		<option value="OldNetworkTopology">OldNetworkTopology</option>
 	</select>
 </p>
 

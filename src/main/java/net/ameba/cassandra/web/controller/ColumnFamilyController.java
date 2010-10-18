@@ -1,22 +1,20 @@
 package net.ameba.cassandra.web.controller;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import net.ameba.cassandra.web.util.ByteArray;
 
+import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.commons.codec.binary.Hex;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -63,13 +61,13 @@ public class ColumnFamilyController extends AbstractBaseController {
 		}
 		
 		// creating definition.
-		CfDef cfdef = new CfDef();
-		cfdef.setName(name);
+		CfDef cfdef = new CfDef(keyspaceName, name);
 		cfdef.setComment(comment);
 		cfdef.setColumn_type(type);
 		cfdef.setComparator_type(comparator);
-		cfdef.setSubcomparator_type(subComparator);
-		cfdef.setTable(keyspaceName);
+		if (subComparator != null && subComparator.length() > 0) {
+			cfdef.setSubcomparator_type(subComparator);
+		}
 		cfdef.setKey_cache_size(keyCache);
 		cfdef.setRow_cache_size(rowCache);
 		cfdef.setPreload_row_cache(preloadRowCache);
@@ -78,7 +76,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 		
 		// redirecting to keyspace page.
 		model.clear();
-		return "redirect:./" + name + "/";
+		return "redirect:/keyspace/" + keyspaceName + "/";
 	}
 	
 	@RequestMapping(value="/keyspace/{keyspaceName}/{columnFamilyName}/", method=RequestMethod.GET)
@@ -90,11 +88,8 @@ public class ColumnFamilyController extends AbstractBaseController {
 		Client client = clientProvider.getThriftClient();
 		
 		// Extracting list of column families
-		Map<String, Map<String, String>> descriptionMap = client.describe_keyspace(keyspaceName);
-		List<String> columnFamilies = new ArrayList<String>(descriptionMap.size());
-		columnFamilies.addAll(descriptionMap.keySet());
-		Collections.sort(columnFamilies);
-		model.put("columnFamilies", columnFamilies);
+		KsDef ksDef = client.describe_keyspace(keyspaceName);
+		model.put("columnFamilies", ksDef.getCf_defs());
 		
 		// setting names
 		model.addAttribute("keyspaceName", keyspaceName);
@@ -219,7 +214,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 				columnFamilyName
 		);
 		model.clear();
-		return "redirect:../" + columnFamilyName + "/";
+		return "redirect:/keyspace/" + keyspaceName + "/" + columnFamilyName + "/";
 		
 	}
 			
@@ -247,7 +242,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 				columnFamilyName
 		);
 		model.clear();
-		return "redirect:../";
+		return "redirect:/keyspace/" + keyspaceName + "/" + columnFamilyName + "/";
 		
 	}
 	
@@ -275,7 +270,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 				columnFamilyName
 		);
 		model.clear();
-		return "redirect:./";
+		return "redirect:/keyspace/" + keyspaceName + "/" + columnFamilyName + "/";
 		
 	}
 	

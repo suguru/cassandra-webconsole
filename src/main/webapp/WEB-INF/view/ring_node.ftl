@@ -58,7 +58,6 @@ function control(target, keyspace, method)
 	<th>Mode</th>
 	<th>Uptime</th>
 	<th>Generation Number</th>
-	<th>Compaction Threshold</th>
 </tr>
 <tr>
 	<td>${address?html}</td>
@@ -66,7 +65,6 @@ function control(target, keyspace, method)
 	<td>${mode?html}</td>
 	<td>${uptime?html}</td>
 	<td>${currentGenerationNumber}</td>
-	<td>${compactionThreshold}</td>
 </tr>
 </table>
 
@@ -102,7 +100,7 @@ function control(target, keyspace, method)
 	<th rowspan="2">Read</th>
 	<th rowspan="2">Write</th>
 	<th colspan="3">Memtable</th>
-	<th colspan="3">Compacted</th>
+	<th colspan="3">Row</th>
 	<th rowspan="2">Pending</th>
 	<th rowspan="2">Latency Histogram</th>
 </tr>
@@ -125,9 +123,9 @@ function control(target, keyspace, method)
 	<td class="number">${cf.memtableDataSize / 1024 / 1024} MB</td>
 	<td class="number">${cf.memtableColumnsCount}</td>
 	<td class="number">${cf.memtableSwitchCount}</td>
-	<td class="bytes">${cf.maxRowCompactedSize / 1024 / 1024} MB</td>
-	<td class="bytes">${cf.minRowCompactedSize / 1024 / 1024} MB</td>
-	<td class="bytes">${cf.meanRowCompactedSize / 1024 / 1024} MB</td>
+	<td class="bytes">${cf.maxRowSize / 1024 / 1024} MB</td>
+	<td class="bytes">${cf.minRowSize / 1024 / 1024} MB</td>
+	<td class="bytes">${cf.meanRowSize / 1024 / 1024} MB</td>
 	<td class="number">${cf.pendingTasks}</td>
 	<td>
 		R:<span class="inlinespark"><#list cf.lifetimeReadLatencyHistogramMicros as v>${v}<#if v_has_next>,</#if></#list></span>

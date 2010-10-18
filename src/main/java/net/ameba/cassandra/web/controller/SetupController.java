@@ -56,7 +56,7 @@ public class SetupController extends AbstractBaseController {
 		
 		model.clear();
 		
-		return "redirect:./";
+		return "redirect:/";
 	}
 
 }
