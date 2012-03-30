@@ -5,7 +5,7 @@
 	<groupId>net.ameba.cassandra</groupId>
 	<artifactId>cassandra-webconsole</artifactId>
 	<packaging>war</packaging>
-	<version>0.7.0-SNAPSHOT</version>
+	<version>1.0.8-SNAPSHOT</version>
 	<name>Cassandra Web Console</name>
 	<url>http://maven.apache.org</url>
 
@@ -32,7 +32,7 @@
 			</plugin>
 
 			<plugin>
-				<groupId>org.mortbay.jetty</groupId>
+				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>maven-jetty-plugin</artifactId>
 				<version>6.1.24</version>
 				<configuration>
@@ -87,19 +87,9 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>org.apache.thrift</groupId>
-			<artifactId>libthrift</artifactId>
-			<scope>system</scope>
-			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/libthrift-r959516.jar</systemPath>
-			<version>r959516</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.cassandra</groupId>
-			<artifactId>cassandra</artifactId>
-			<scope>system</scope>
-			<systemPath>${basedir}/src/main/webapp/WEB-INF/lib/apache-cassandra-0.7.0-beta2.jar</systemPath>
-			<version>0.7.0-beta2</version>
+			<artifactId>cassandra-thrift</artifactId>
+			<version>1.0.8</version>
 		</dependency>
 
 		<dependency>
@@ -117,37 +107,37 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.6.0</version>
+			<version>1.6.4</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>jcl-over-slf4j</artifactId>
-			<version>1.6.0</version>
+			<version>1.6.4</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
-			<version>1.6.0</version>
+			<version>1.6.4</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-core</artifactId>
-			<version>0.9.21</version>
+			<version>1.0.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>0.9.21</version>
+			<version>1.0.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.tuckey</groupId>
 			<artifactId>urlrewritefilter</artifactId>
-			<version>3.1.0</version>
+			<version>3.2.0</version>
 		</dependency>
 
 		<dependency>
@@ -159,7 +149,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-			<version>3.0.2.RELEASE</version>
+			<version>3.1.1.RELEASE</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
@@ -171,7 +161,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
-			<version>3.0.2.RELEASE</version>
+			<version>3.1.1.RELEASE</version>
 			<exclusions>
 				<exclusion>
 					<groupId>commons-logging</groupId>
@@ -182,9 +172,9 @@
 
 		<!-- for Standalone Server -->
 		<dependency>
-			<groupId>org.mortbay.jetty</groupId>
-			<artifactId>jetty-embedded</artifactId>
-			<version>6.1.24</version>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-webapp</artifactId>
+			<version>8.1.2.v20120308</version>
 		</dependency>
 
 		<dependency>

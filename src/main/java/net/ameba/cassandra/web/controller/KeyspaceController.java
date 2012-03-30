@@ -2,7 +2,9 @@ package net.ameba.cassandra.web.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.ameba.cassandra.web.service.CassandraClientProvider;
 
@@ -118,7 +120,10 @@ public class KeyspaceController extends AbstractBaseController {
 			strategyClass = OldNetworkTopologyStrategy.class;
 		}
 		
-		KsDef ksDef = new KsDef(name, strategyClass.getName(), replicationFactor, new ArrayList<CfDef>());
+		KsDef ksDef = new KsDef(name, strategyClass.getName(), new ArrayList<CfDef>());
+		Map<String, String> strategyOptions = new HashMap<String, String>();
+		strategyOptions.put("replication_factor", String.valueOf(replicationFactor));
+		ksDef.setStrategy_options(strategyOptions);
 		client.system_add_keyspace(ksDef);
 		
 		model.clear();
@@ -139,19 +144,7 @@ public class KeyspaceController extends AbstractBaseController {
 			@RequestParam("name") String name,
 			ModelMap model
 			) throws Exception {
-		
-		Client client = clientProvider.getThriftClient();
-		
-		name = name.trim();
-		if (name.length() == 0) {
-			throw new IllegalArgumentException("Name must not be empty");
-		}
-
-		client.set_keyspace(originalName);
-		client.system_rename_keyspace(originalName, name);
-		
-		model.clear();
-		return "redirect:/keyspace/" + name + "/";
+		throw new UnsupportedOperationException("rename keyspace no longer supported");
 	}
 
 	@RequestMapping(value="/keyspace/{name}/drop", method=RequestMethod.GET)

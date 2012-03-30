@@ -7,10 +7,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.DefaultHandler;
-import org.mortbay.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.webapp.WebAppContext;
 
 /**
  * Standalone server of cassandra web console.
@@ -61,10 +61,11 @@ public class StandaloneServer {
 		
 		context.setWar(uri.toString());
 		
-		server.setHandlers(new Handler[] {
-				context,
-				new DefaultHandler()
-		});
+		HandlerList list = new HandlerList();
+		list.addHandler(context);
+		list.addHandler(new DefaultHandler());
+		
+		server.setHandler(list);
 		
 		server.start();
 		

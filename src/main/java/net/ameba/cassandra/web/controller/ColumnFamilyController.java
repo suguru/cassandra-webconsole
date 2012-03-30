@@ -44,7 +44,6 @@ public class ColumnFamilyController extends AbstractBaseController {
 			@RequestParam("comment") String comment,
 			@RequestParam("keyCache") double keyCache,
 			@RequestParam("rowCache") double rowCache,
-			@RequestParam(value="preloadRowCache", required=false, defaultValue="false") boolean preloadRowCache,
 			ModelMap model) throws Exception {
 		
 		Client client = clientProvider.getThriftClient();
@@ -70,7 +69,6 @@ public class ColumnFamilyController extends AbstractBaseController {
 		}
 		cfdef.setKey_cache_size(keyCache);
 		cfdef.setRow_cache_size(rowCache);
-		cfdef.setPreload_row_cache(preloadRowCache);
 		
 		client.system_add_column_family(cfdef);
 		
@@ -162,9 +160,9 @@ public class ColumnFamilyController extends AbstractBaseController {
 				for (int j = 0; j < clen; j++) {
 					ColumnOrSuperColumn cos = keySlice.columns.get(j);
 					if (cos.isSetColumn()) {
-						type.columns[j] = new String(Hex.encodeHex(cos.column.name));
+						type.columns[j] = new String(Hex.encodeHex(cos.column.getName()));
 					} else if (cos.isSetSuper_column()) {
-						type.columns[j] = new String(Hex.encodeHex(cos.super_column.name));
+						type.columns[j] = new String(Hex.encodeHex(cos.super_column.getName()));
 					} else {
 						type.columns[j] = "Unknown";
 					}
@@ -207,6 +205,8 @@ public class ColumnFamilyController extends AbstractBaseController {
 			@RequestParam("name") String columnFamilyName,
 			ModelMap model) throws Exception {
 		
+		throw new UnsupportedOperationException("rename column family no longer supported");
+		/*
 		Client client = clientProvider.getThriftClient();
 		client.set_keyspace(keyspaceName);
 		client.system_rename_column_family(
@@ -215,6 +215,7 @@ public class ColumnFamilyController extends AbstractBaseController {
 		);
 		model.clear();
 		return "redirect:/keyspace/" + keyspaceName + "/" + columnFamilyName + "/";
+		*/
 		
 	}
 			
