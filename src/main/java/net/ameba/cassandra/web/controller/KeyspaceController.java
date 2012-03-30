@@ -8,9 +8,6 @@ import java.util.Map;
 
 import net.ameba.cassandra.web.service.CassandraClientProvider;
 
-import org.apache.cassandra.locator.NetworkTopologyStrategy;
-import org.apache.cassandra.locator.OldNetworkTopologyStrategy;
-import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
@@ -111,16 +108,16 @@ public class KeyspaceController extends AbstractBaseController {
 			throw new IllegalArgumentException("Name must not be empty");
 		}
 		
-		Class<?> strategyClass = null;
+		String strategyClass = null;
 		if (strategy.equals("Simple")) {
-			strategyClass = SimpleStrategy.class;
+			strategyClass ="org.apache.cassandra.locator SimpleStrategy"; 
 		} else if (strategy.equals("NetworkTopology")) {
-			strategyClass = NetworkTopologyStrategy.class;
+			strategyClass = "org.apache.cassandra.locator NetworkTopologyStrategy";
 		} else if (strategy.equals("OldNetworkTopology")) {
-			strategyClass = OldNetworkTopologyStrategy.class;
+			strategyClass = "org.apache.cassandra.locator.OldNetworkTopologyStrategy";
 		}
 		
-		KsDef ksDef = new KsDef(name, strategyClass.getName(), new ArrayList<CfDef>());
+		KsDef ksDef = new KsDef(name, strategyClass, new ArrayList<CfDef>());
 		Map<String, String> strategyOptions = new HashMap<String, String>();
 		strategyOptions.put("replication_factor", String.valueOf(replicationFactor));
 		ksDef.setStrategy_options(strategyOptions);

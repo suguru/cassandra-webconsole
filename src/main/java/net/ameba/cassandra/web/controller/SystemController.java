@@ -7,12 +7,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 
 import net.ameba.cassandra.web.service.CassandraClientProvider;
 
 import org.apache.cassandra.concurrent.IExecutorMBean;
+import org.apache.cassandra.concurrent.JMXEnabledThreadPoolExecutorMBean;
 import org.apache.cassandra.db.ColumnFamilyStoreMBean;
 import org.apache.cassandra.dht.Token;
 import org.apache.cassandra.thrift.Cassandra.Client;
@@ -70,10 +70,10 @@ public class SystemController extends AbstractBaseController {
 			throw new RuntimeException("JMX Connection failed.");
 		}
 		
-		Set<String> liveNodes = probe.getLiveNodes();
-		Set<String> deadNodes = probe.getUnreachableNodes();
-		Set<String> joiningNodes = probe.getJoiningNodes();
-		Set<String> leavingNodes = probe.getLeavingNodes();
+		List<String> liveNodes = probe.getLiveNodes();
+		List<String> deadNodes = probe.getUnreachableNodes();
+		List<String> joiningNodes = probe.getJoiningNodes();
+		List<String> leavingNodes = probe.getLeavingNodes();
 		Map<String, String> loadMap = probe.getLoadMap();
 		
 		Map<Token, String> endpointMap = probe.getTokenToEndpointMap();
@@ -174,10 +174,10 @@ public class SystemController extends AbstractBaseController {
 		}
 		
 		// Thread pool stats
-		Iterator<Entry<String, IExecutorMBean>> tpIterator = probe.getThreadPoolMBeanProxies();
+		Iterator<Entry<String, JMXEnabledThreadPoolExecutorMBean>> tpIterator = probe.getThreadPoolMBeanProxies();
 		Map<String, IExecutorMBean> tpMap = new TreeMap<String, IExecutorMBean>();
 		while (tpIterator.hasNext()) {
-			Entry<String, IExecutorMBean> entry = tpIterator.next();
+			Entry<String, JMXEnabledThreadPoolExecutorMBean> entry = tpIterator.next();
 			tpMap.put(entry.getKey(), entry.getValue());
 		}
 		
@@ -334,14 +334,7 @@ public class SystemController extends AbstractBaseController {
 		cassandraService.scheduleExecution(new Runnable() {
 			@Override
 			public void run() {
-				NodeProbe probe = clientProvider.getProbe(address);
-				if (probe != null) {
-					try {
-						probe.loadBalance();
-					} catch (Exception e) {
-						log.error("Failed to loadbalance " + address, e);
-					}
-				}
+				log.error("loadbalance no longer supported " + address);
 			}
 		});
 		model.clear();
@@ -364,7 +357,7 @@ public class SystemController extends AbstractBaseController {
 				NodeProbe probe = clientProvider.getProbe(address);
 				if (probe != null) {
 					try {
-						probe.forceTableCleanup();
+						//probe.forceTableCleanup(tableName, columnFamilies);
 					} catch (Exception e) {
 						log.error("Failed to cleanup " + address, e);
 					}
@@ -391,7 +384,7 @@ public class SystemController extends AbstractBaseController {
 				NodeProbe probe = clientProvider.getProbe(address);
 				if (probe != null) {
 					try {
-						probe.forceTableCompaction();
+						//probe.forceTableCompaction();
 					} catch (Exception e) {
 						log.error("Failed force table compaction " + address, e);
 					}
